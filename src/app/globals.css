@@ -1,6 +1,30 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
+@import "../styles/tienda.css" layer(components);
 
+/* Utilidades de Tailwind sobre los tokens: bg-bg, bg-surface, text-text, text-text-2, border-border… */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-dark: var(--dark);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+html {
+  background: var(--bg);
+}
 body {
-  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
