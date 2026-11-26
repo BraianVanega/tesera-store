@@ -1,0 +1,145 @@
+{
+  "_nota": "Resultado esperado del parser para la Nota de Pedido real NP 100071718 (datos del cliente omitidos a propósito).",
+  "supplierRef": "100071718",
+  "issuedAt": "2026-11-25",
+  "paymentTerms": "CUENTA CORRIENTE 4 DIAS",
+  "net": 272557.74,
+  "total": 272557.74,
+  "priceIncludesVat": true,
+  "units": 56,
+  "lines": [
+    {
+      "code": "MS17P",
+      "description": "ANILLO LOVE RING PIEL",
+      "qty": 1,
+      "listPrice": 4490.0,
+      "discountPct": 51,
+      "lineTotal": 2200.1
+    },
+    {
+      "code": "S01",
+      "description": "GEL INTIMO SENS BOMB MACA 70 GR.",
+      "qty": 2,
+      "listPrice": 9000.0,
+      "discountPct": 53,
+      "lineTotal": 8460.0
+    },
+    {
+      "code": "BI-014750",
+      "description": "VIBRADOR ESTIMULADOR DEDO - PRETTY LOVE",
+      "qty": 2,
+      "listPrice": 42173.0,
+      "discountPct": 70,
+      "lineTotal": 25303.8
+    },
+    {
+      "code": "D02-2",
+      "description": "MAGIC DUAL ACEITE SENSUAL PARA MASAJES Y LUBRICANT",
+      "qty": 2,
+      "listPrice": 16596.0,
+      "discountPct": 53,
+      "lineTotal": 15600.24
+    },
+    {
+      "code": "ST-GSDL80",
+      "description": "GEL LUBRICANTE INTIMO DULCE DE LECHE 80ML",
+      "qty": 3,
+      "listPrice": 4705.0,
+      "discountPct": 50,
+      "lineTotal": 7057.5
+    },
+    {
+      "code": "ST-GSCH80",
+      "description": "GEL LUBRICANTE INTIMO CHICLE 80ML",
+      "qty": 3,
+      "listPrice": 4705.0,
+      "discountPct": 50,
+      "lineTotal": 7057.5
+    },
+    {
+      "code": "FN-C3523",
+      "description": "GEL DIABOLICO FISTING ANAL VAGINAL - 500ML",
+      "qty": 3,
+      "listPrice": 25109.0,
+      "discountPct": 53,
+      "lineTotal": 35403.69
+    },
+    {
+      "code": "ST-GT30",
+      "description": "GEL LUBRICANTE ANAL ROSAS 30ML",
+      "qty": 3,
+      "listPrice": 2201.0,
+      "discountPct": 50,
+      "lineTotal": 3301.5
+    },
+    {
+      "code": "ST-BOV",
+      "description": "ACEITE PARA MASAJES VAINILLA 60ML",
+      "qty": 3,
+      "listPrice": 4872.0,
+      "discountPct": 50,
+      "lineTotal": 7308.01
+    },
+    {
+      "code": "D62",
+      "description": "MASSAGE CANDLE LATTE CAPUCCINO & DULCE DE LECHE -",
+      "qty": 3,
+      "listPrice": 11916.0,
+      "discountPct": 60,
+      "lineTotal": 14299.19
+    },
+    {
+      "code": "MS23",
+      "description": "MISS V COOKIES",
+      "qty": 5,
+      "listPrice": 11592.01,
+      "discountPct": 58,
+      "lineTotal": 24343.21
+    },
+    {
+      "code": "LUB02",
+      "description": "LUBRICANTE PERSONAL ANAL LUBE INTENSITY HOT PLEASU",
+      "qty": 5,
+      "listPrice": 12544.0,
+      "discountPct": 56,
+      "lineTotal": 27596.79
+    },
+    {
+      "code": "MS09",
+      "description": "MISS V CALOR",
+      "qty": 5,
+      "listPrice": 12056.0,
+      "discountPct": 58,
+      "lineTotal": 25317.61
+    },
+    {
+      "code": "LUB03",
+      "description": "GEL LUBRICANTE LUBE SUPREME RETARDANTE 130ML",
+      "qty": 5,
+      "listPrice": 12544.0,
+      "discountPct": 56,
+      "lineTotal": 27596.79
+    },
+    {
+      "code": "LUB01",
+      "description": "LUBRICANTE PERSONAL ANAL LUBE PREMIUM RELAXING 130",
+      "qty": 5,
+      "listPrice": 12544.0,
+      "discountPct": 56,
+      "lineTotal": 27596.79
+    },
+    {
+      "code": "ST-GN80",
+      "description": "GEL LUBRICANTE INTIMO NEUTRO 80ML",
+      "qty": 6,
+      "listPrice": 4705.0,
+      "discountPct": 50,
+      "lineTotal": 14115.0
+    }
+  ],
+  "validation": {
+    "lineFormulaTolerance": 0.03,
+    "sumVsNetTolerance": 0.05,
+    "sumOfLineTotals": 272557.72
+  }
+}

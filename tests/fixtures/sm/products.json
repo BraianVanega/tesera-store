@@ -1,0 +1,48 @@
+{
+  "ok": true,
+  "data": {
+    "total": 2,
+    "page": 1,
+    "pageSize": 50,
+    "totalPaginas": 1,
+    "items": [
+      {
+        "sku": "ABC123",
+        "nombre": "Producto de ejemplo",
+        "upc": "7790000000000",
+        "marca": "Marca X",
+        "precioSugeridoPublico": 24990.0,
+        "costoCliente": 18742.5,
+        "campania": null,
+        "iva": 21.0,
+        "stock": 12,
+        "estado": "disponible",
+        "permiteFlex": true,
+        "pesoGramos": 350,
+        "dimensionesCm": { "largo": 20, "ancho": 12, "alto": 5 },
+        "imagenes": [
+          { "orden": 2, "url": "https://www.sexshopmayorista.com/pi/1400x1400_Webp/def.webp" },
+          { "orden": 1, "url": "https://www.sexshopmayorista.com/pi/1400x1400_Webp/abc.webp" }
+        ],
+        "ultimaActualizacion": "2026-06-25T16:35:10"
+      },
+      {
+        "sku": "XYZ 789",
+        "nombre": "Otro producto de ejemplo",
+        "upc": null,
+        "marca": null,
+        "precioSugeridoPublico": 9990.0,
+        "costoCliente": 6993.0,
+        "campania": { "nombre": "Campaña de ejemplo", "descuentoPct": 30, "hasta": "2026-12-31" },
+        "iva": 21.0,
+        "stock": 2,
+        "estado": "bajo_stock",
+        "permiteFlex": false,
+        "pesoGramos": null,
+        "dimensionesCm": null,
+        "imagenes": [],
+        "ultimaActualizacion": "2026-06-25T16:35:10"
+      }
+    ]
+  }
+}

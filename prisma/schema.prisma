@@ -1,0 +1,336 @@
+// Tésera — esquema completo (basado en docs/03-modelo-datos.md)
+// Dinero: enteros de pesos. Fechas: UTC.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7: las URLs de conexión viven en prisma.config.ts (migraciones, DIRECT_URL)
+// y en src/lib/db.ts (runtime, DATABASE_URL vía @prisma/adapter-pg).
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Enums ─────────────────────────────────────────────────────────────
+
+enum Supplier {
+  SM
+  BUTTMAN
+}
+
+enum FulfillmentMode {
+  DROPSHIP
+  STOCK
+}
+
+enum MovementType {
+  IN
+  SALE
+  ADJUST
+  RETURN
+}
+
+enum EncargoStatus {
+  PENDIENTE
+  PEDIDO_A_PROVEEDOR
+  RECIBIDO
+  ENTREGADO
+  CANCELADO
+}
+
+enum RestockStatus {
+  BORRADOR
+  ENVIADO
+  RECIBIDO
+}
+
+enum Channel {
+  WEB
+  ML
+}
+
+// Sumar CASH_MP / ALT cuando se activen.
+enum PaymentMethod {
+  MP
+  TRANSFER
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  FULFILLING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum Zone {
+  MDP
+  AMBA
+  INTERIOR
+}
+
+enum FulfillmentSource {
+  LOCAL
+  ENCARGO
+  DROPSHIP
+}
+
+enum Role {
+  OWNER
+  OPERATOR
+}
+
+// ── Catálogo ──────────────────────────────────────────────────────────
+
+model Product {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  description  String?
+  price        Int                              // precio de lista (incluye +5% comisión MP)
+  category     String
+  brand        String?
+  isConsumable Boolean  @default(false)         // geles, aceites, preservativos
+  published    Boolean  @default(false)
+  images       ProductImage[]
+  offers       SupplierOffer[]
+  localStock   LocalStock?
+  encargos     Encargo[]
+  orderItems   OrderItem[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([category, published])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String                               // nuestro storage/CDN
+  sourceUrl String?                              // URL original del proveedor (hash de contenido → evita re-descarga)
+  position  Int     @default(1)
+
+  @@unique([productId, sourceUrl])
+}
+
+model SupplierOffer {
+  id          String          @id @default(cuid())
+  productId   String
+  product     Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supplier    Supplier
+  supplierSku String
+  mode        FulfillmentMode
+  cost        Int                                // dropship: costoCliente; stock: precio mayorista
+  stock       Int                                // SM: tope 20, NO es el real
+  stockState  String?                            // disponible | bajo_stock | agotado
+  suggested   Int?                               // precioSugeridoPublico (referencia)
+  campaign    Json?                              // { nombre, descuentoPct, hasta }
+  weightGr    Int?
+  dimensions  Json?
+  vatPct      Decimal?        @db.Decimal(5, 2)
+  syncedAt    DateTime
+
+  @@unique([supplier, supplierSku, mode])
+  @@index([productId])
+}
+
+// ── Stock local ───────────────────────────────────────────────────────
+
+model LocalStock {
+  productId String          @id
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int             @default(0)          // recalculado desde movimientos
+  reserved  Int             @default(0)          // reservas de pedidos PENDING_PAYMENT
+  movements StockMovement[]
+}
+
+model StockMovement {
+  id         String      @id @default(cuid())
+  productId  String
+  localStock LocalStock  @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  type       MovementType
+  quantity   Int                                  // + o -
+  unitCost   Int?                                 // IN: costo real (incluye envío prorrateado)
+  note       String?
+  orderId    String?
+  restockId  String?
+  createdBy  String?
+  createdAt  DateTime    @default(now())
+
+  @@index([productId, createdAt])
+}
+
+// ── Encargos y pedido semanal ─────────────────────────────────────────
+
+model Encargo {
+  id          String        @id @default(cuid())
+  orderId     String
+  order       Order         @relation(fields: [orderId], references: [id])
+  productId   String
+  product     Product       @relation(fields: [productId], references: [id])
+  quantity    Int
+  status      EncargoStatus @default(PENDIENTE)
+  restockId   String?
+  restock     RestockOrder? @relation(fields: [restockId], references: [id])
+  createdAt   DateTime      @default(now())
+  deliveredAt DateTime?
+}
+
+model RestockOrder {                              // pedido semanal a SM / Buttman
+  id           String        @id @default(cuid())
+  supplier     Supplier
+  supplierRef  String?                            // SM: número de Nota de Pedido (NP); evita cargar dos veces
+  status       RestockStatus @default(BORRADOR)
+  shippingCost Int?                               // se prorratea entre los ítems (carga manual)
+  total        Int?                               // Neto de la NP (IVA incluido)
+  paymentTerms String?                            // ej. "CUENTA CORRIENTE 4 DIAS"
+  paymentDueAt DateTime?                          // fecha de ingreso + plazo (recordatorio en el panel)
+  pdfUrl       String?                            // Blob privado (contiene datos personales del titular)
+  issuedAt     DateTime?
+  cutoffAt     DateTime?                          // cierre (ej. jueves)
+  receivedAt   DateTime?
+  lines        RestockLine[]
+  encargos     Encargo[]
+
+  @@unique([supplier, supplierRef])
+}
+
+model RestockLine {                               // línea de una Nota de Pedido
+  id            String       @id @default(cuid())
+  restockId     String
+  restock       RestockOrder @relation(fields: [restockId], references: [id], onDelete: Cascade)
+  code          String                            // código normalizado (sin espacios)
+  description   String
+  productId     String?                           // null = producto sin vincular
+  qtyOrdered    Int
+  qtyReceived   Int?
+  listPrice     Decimal      @db.Decimal(12, 2)   // P.Unitario (precio de lista de SM, NO es nuestro costo)
+  discountPct   Decimal      @db.Decimal(5, 2)    // Bonif.
+  lineTotal     Decimal      @db.Decimal(12, 2)   // P.Total (IVA incluido)
+  netUnitCost   Decimal      @db.Decimal(12, 2)   // lineTotal / qtyOrdered = costo real por unidad
+  warnings      Json?
+}
+
+// ── Pedidos ───────────────────────────────────────────────────────────
+
+model Order {
+  id              String        @id @default(cuid())
+  code            String        @unique           // legible, no secuencial: TS-7K3QX9 (= externalOrderId en SM)
+  channel         Channel       @default(WEB)
+  paymentMethod   PaymentMethod
+  status          OrderStatus   @default(PENDING_PAYMENT)
+  zone            Zone
+
+  // Montos (pesos enteros)
+  subtotal        Int                              // a precio de lista
+  discount        Int           @default(0)        // 10% si TRANSFER
+  shippingCharged Int           @default(0)        // lo que paga el cliente
+  shippingCost    Int           @default(0)        // lo que nos cobra SM / cadete
+  total           Int
+
+  // Pago
+  paymentDueAt    DateTime?                        // TRANSFER: createdAt + 24 h
+  paymentProofUrl String?
+  verifiedBy      String?                          // Eric
+  paidAt          DateTime?
+
+  // Entrega (snapshot; se anonimiza según retención)
+  customerName    String?
+  customerPhone   String?
+  customerEmail   String?
+  street          String?
+  streetNumber    String?
+  floor           String?
+  locality        String?
+  postalCode      String
+  provinceId      Int?
+  province        String?
+  deliverTogether Boolean       @default(false)    // carrito mixto MdP: "prefiero todo junto"
+  anonymizedAt    DateTime?
+
+  // Dropship / SM
+  shippingCode    String?                          // ej. moova-flex, ca-cp-dom
+  quoteId         String?                          // de la cotización del CHECKOUT (con calle y número)
+  agencyId        String?
+  supplierOrderId Int?                             // pedidoId de SM
+  supplierStatus  String?                          // fulfillmentStatus crudo de SM (valores no documentados)
+  supplierWarnings Json?
+  trackingCode    String?
+  dispatchedAt    DateTime?
+
+  needsAttention  Boolean       @default(false)
+  attentionNote   String?
+  trackingToken   String        @unique            // para /pedido/[code]?t=
+
+  items           OrderItem[]
+  encargos        Encargo[]
+  paymentEvents   PaymentEvent[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([status, createdAt])
+  @@index([paymentDueAt])
+}
+
+model OrderItem {
+  id        String            @id @default(cuid())
+  orderId   String
+  order     Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product           @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Int                                    // precio de lista al momento de la compra
+  source    FulfillmentSource
+  unitCost  Int?                                   // costo real al momento (para liquidación)
+}
+
+// ── Pagos ─────────────────────────────────────────────────────────────
+
+model PaymentEvent {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+  provider   String                                // MP | TRANSFER | ...
+  externalId String                                // payment.id
+  status     String
+  amount     Int?
+  createdAt  DateTime @default(now())
+
+  @@unique([provider, externalId, status])         // idempotencia de webhooks
+}
+
+// ── Operación ─────────────────────────────────────────────────────────
+
+model User {
+  id    String @id @default(cuid())
+  email String @unique
+  name  String?
+  role  Role
+}
+
+model IntegrationLog {                             // SIN PII
+  id        String   @id @default(cuid())
+  service   String                                  // SM | MP | CRON
+  action    String
+  ok        Boolean
+  httpStatus Int?
+  orderCode String?
+  message   String?
+  createdAt DateTime @default(now())
+
+  @@index([service, createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+}
