@@ -1,0 +1,12 @@
+design/
+docs/
+pnpm-lock.yaml
+.next/
+coverage/
+playwright-report/
+test-results/
+CLAUDE.md
+AGENTS.md
+PROMPT-INICIO.md
+README.md
+tests/fixtures/

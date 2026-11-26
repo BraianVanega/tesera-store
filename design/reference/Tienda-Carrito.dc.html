@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<title>Tésera · Carrito</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/954355a75b613403837594d1b08fa551">
+<link rel="stylesheet" href="./tienda.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&amp;family=Marcellus&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font-family: var(--font-body)">
+
+<header style="display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; min-height: 64px; padding-inline: 20px 8px; background: var(--bg); border-bottom: 1px solid var(--border)">
+<a href="Tienda-Home.dc.html" class="t-link" style="font-family: var(--font-display); font-size: 18px; letter-spacing: 0.3em; text-transform: uppercase">{{brand}}</a>
+<span style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border: 1px solid var(--border); font: 500 13px var(--font-body)">CP 7600 · Mar del Plata</span>
+</header>
+
+<main style="flex: 1">
+<div class="m-wrap" style="padding-block: 24px 0; display: flex; flex-direction: column; gap: 6px">
+<h1 class="m-h2" style="font-size: 32px">Tu pedido</h1>
+<p class="m-p">{{itemsCount}}</p>
+</div>
+
+<section aria-label="Envío gratis" class="m-wrap" style="padding-block: 20px 0">
+<div class="m-box" style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-weight: 600; font-size: 15px" aria-live="polite">{{barText}}</span>
+<div class="m-bar" role="progressbar" aria-valuemin="0" aria-valuemax="15000" aria-valuenow="{{barNow}}" aria-label="Progreso hacia el envío gratis"><span style="width: {{barPct}}"></span></div>
+<span style="font-size: 12px; color: var(--text-2)">Envío gratis desde $ 15.000 en Mar del Plata con stock local. Se calcula sobre el precio de lista.</span>
+</div>
+</section>
+
+<sc-if value="{{split}}" hint-placeholder-val="{{ true }}">
+<section aria-labelledby="h-hoy" class="m-wrap" style="padding-block: 24px 0; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<h2 id="h-hoy" class="m-h3">Tanda 1 · Hoy</h2>
+<span class="b b-hoy">Entrega hoy con cadete</span>
+</div>
+<div style="display: grid; grid-template-columns: 84px 1fr; gap: 14px; padding: 12px; background: var(--surface); border: 1px solid var(--border)">
+<div class="m-ph" style="aspect-ratio: 1 / 1"><div class="m-ph-in"></div></div>
+<div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+<span style="font-family: var(--font-display); font-size: 17px; line-height: 1.2">Gel lubricante base agua 100 ml</span>
+<span class="pr-lista">{{gelUnit}} c/u</span>
+<div style="display: flex; align-items: center; justify-content: space-between">
+<div class="p-stepper" role="group" aria-label="Cantidad de gel lubricante"><button type="button" aria-label="Quitar una unidad" onClick="{{minus}}">−</button><span aria-live="polite">{{qty}}</span><button type="button" aria-label="Agregar una unidad" onClick="{{plus}}">+</button></div>
+<span style="font-weight: 600">{{gelTotal}}</span>
+</div>
+</div>
+</div>
+</section>
+<section aria-labelledby="h-enc" class="m-wrap" style="padding-block: 24px 0; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<h2 id="h-enc" class="m-h3">Tanda 2 · Llega después</h2>
+<span class="b b-enc">5 a 10 días</span>
+</div>
+<div style="display: grid; grid-template-columns: 84px 1fr; gap: 14px; padding: 12px; background: var(--surface); border: 1px solid var(--border)">
+<div class="m-ph" style="aspect-ratio: 1 / 1"><div class="m-ph-in"></div></div>
+<div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+<span style="font-family: var(--font-display); font-size: 17px; line-height: 1.2">Vibrador Nocturno de silicona</span>
+<span class="pr-lista">$ 42.500 · 1 unidad</span>
+<span style="font-size: 13px; color: var(--text-2)">Lo pedimos al mayorista esta semana y te avisamos cuando esté listo para entregar.</span>
+</div>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{together}}" hint-placeholder-val="{{ false }}">
+<section aria-labelledby="h-all" class="m-wrap" style="padding-block: 24px 0; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<h2 id="h-all" class="m-h3">Todo junto</h2>
+<span class="b b-enc">5 a 10 días</span>
+</div>
+<div class="m-box"><p class="m-p">Recibís los 2 productos en una sola entrega, cuando llegue el último. El gel no se adelanta.</p></div>
+</section>
+</sc-if>
+
+<section class="m-wrap" style="padding-block: 16px 0">
+<button type="button" role="switch" aria-checked="{{togetherChecked}}" onClick="{{toggleTogether}}" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 0 14px; background: transparent; color: var(--text); border: 1px solid var(--border); font: 500 15px var(--font-body); cursor: pointer; text-align: left">
+<span style="flex: none; width: 22px; height: 22px; border: 1.5px solid var(--text); display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700">{{togetherMark}}</span>
+<span>Prefiero recibir todo junto</span>
+</button>
+</section>
+
+<section aria-labelledby="h-res" class="m-wrap" style="padding-block: 28px 0; display: flex; flex-direction: column; gap: 12px">
+<h2 id="h-res" class="m-h3">Resumen</h2>
+<div class="m-row"><span class="m-row-k">Subtotal (precio de lista)</span><span>{{subtotal}}</span></div>
+<div class="m-row"><span class="m-row-k">Descuento por transferencia (10%)</span><span>− {{disc}}</span></div>
+<hr class="m-div">
+<div class="m-row" style="align-items: center"><span style="font-weight: 600">Total con transferencia</span><span style="font-size: 22px; font-weight: 600">{{transf}}</span></div>
+<div class="m-row"><span class="m-row-k">Total con Mercado Pago o tarjeta</span><span>{{subtotal}}</span></div>
+<p style="margin: 0; font-size: 12px; color: var(--text-2)">El envío se elige en el siguiente paso, con precio y plazo.</p>
+</section>
+
+<section class="m-wrap" style="padding-block: 24px 32px">
+<div class="m-box" style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600">Tu compra es privada</span>
+<span class="m-p" style="font-size: 14px">Caja 100% neutra, sin logos ni descripción del contenido. En tu resumen de tarjeta figura TESERA. Nadie sabe qué compraste.</span>
+</div>
+</section>
+</main>
+
+<div style="position: sticky; bottom: 0; padding: 12px 20px; background: var(--bg); border-top: 1px solid var(--border)">
+<a href="Tienda-Checkout.dc.html" class="t-btn m-btn-full">Continuar con tus datos</a>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"claro","options":["claro","discreto"],"section":"Modo"},"$preview":{"width":390,"height":1750}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const d = this.props.theme === 'discreto';
+    const qty = s.qty || 1;
+    const together = !!s.together;
+    const money = (n) => '$ ' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const gel = 11900, vib = 42500, threshold = 15000;
+    const gelTotal = gel * qty;
+    const subtotal = gelTotal + vib;
+    const disc = Math.round(subtotal * 0.1);
+    // La barra mide solo lo que tiene stock local (tanda "Hoy"), sobre precio de lista.
+    const falta = Math.max(0, threshold - gelTotal);
+    const pct = Math.min(100, Math.round((gelTotal / threshold) * 100));
+    return {
+      theme: d ? 'discreto' : 'claro',
+      brand: d ? 'Tienda' : 'Tésera',
+      qty, split: !together, together,
+      itemsCount: (qty + 1) + ' productos',
+      barText: falta > 0 ? 'Te faltan ' + money(falta) + ' para el envío gratis' : '¡Listo! Tu entrega de hoy tiene envío gratis',
+      barNow: Math.min(gelTotal, threshold), barPct: pct + '%',
+      gelUnit: money(gel), gelTotal: money(gelTotal),
+      minus: () => this.setState({ qty: Math.max(1, qty - 1) }),
+      plus: () => this.setState({ qty: qty + 1 }),
+      toggleTogether: () => this.setState({ together: !together }),
+      togetherChecked: together ? 'true' : 'false',
+      togetherMark: together ? '✓' : '',
+      subtotal: money(subtotal), disc: money(disc), transf: money(subtotal - disc)
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<title>Tésera · Confirmación</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/954355a75b613403837594d1b08fa551">
+<link rel="stylesheet" href="./tienda.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&amp;family=Marcellus&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font-family: var(--font-body)">
+
+<header style="display: flex; align-items: center; min-height: 64px; padding-inline: 20px; background: var(--bg); border-bottom: 1px solid var(--border)">
+<a href="Tienda-Home.dc.html" class="t-link" style="font-family: var(--font-display); font-size: 18px; letter-spacing: 0.3em; text-transform: uppercase">{{brand}}</a>
+</header>
+
+<main style="flex: 1">
+<section class="m-wrap" style="padding-block: 28px 8px; display: flex; flex-direction: column; gap: 14px">
+<span class="{{statusCls}}" style="align-self: flex-start">{{status}}</span>
+<h1 class="m-h2" style="font-size: 32px">{{title}}</h1>
+<p class="m-p">{{lead}}</p>
+</section>
+
+<sc-if value="{{isTransfer}}" hint-placeholder-val="{{ true }}">
+<section aria-labelledby="h-pay" class="m-wrap" style="padding-block: 16px 0; display: flex; flex-direction: column; gap: 14px">
+<div class="m-box" style="display: flex; flex-direction: column; gap: 10px; border-color: var(--text)">
+<span class="pr-lista">Monto exacto a transferir</span>
+<span style="font-size: 34px; font-weight: 600; line-height: 1.1">$ 51.460</span>
+<span class="pr-off" style="align-self: flex-start">10% OFF aplicado</span>
+</div>
+<div class="m-box" style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-weight: 600" id="h-timer">Tiempo para pagar</span><span style="font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums" aria-label="Quedan 23 horas y 41 minutos">23:41:12</span></div>
+<div class="m-bar" role="progressbar" aria-valuemin="0" aria-valuemax="24" aria-valuenow="23" aria-labelledby="h-timer"><span style="width: 98%"></span></div>
+<span style="font-size: 13px; color: var(--text-2)">Si pasan 24 h sin el pago, el pedido se cancela y liberamos el stock.</span>
+</div>
+
+<h2 id="h-pay" class="m-h3" style="margin-top: 8px">Datos para transferir</h2>
+<div style="display: flex; flex-direction: column; border: 1px solid var(--border); background: var(--surface)">
+<sc-for list="{{fields}}" as="f" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; border-bottom: 1px solid var(--border)">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 12px; color: var(--text-2)">{{f.k}}</span><span style="font-weight: 600; font-size: 15px; word-break: break-all">{{f.v}}</span></div>
+<button type="button" class="t-btn-sec" onClick="{{f.copy}}" aria-label="{{f.aria}}" style="min-width: 96px">{{f.label}}</button>
+</div>
+</sc-for>
+</div>
+<div class="m-box" style="display: flex; gap: 12px; align-items: flex-start">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px; color: var(--accent)"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+<span style="font-size: 14px; line-height: 1.45">En tu banco va a figurar el nombre del titular de la cuenta, no el de la tienda. Tu compra queda privada.</span>
+</div>
+
+<h2 class="m-h3" style="margin-top: 8px">Ya transferiste</h2>
+<p class="m-p">Mandanos el comprobante. Lo verificamos y despachamos.</p>
+<button type="button" class="t-btn m-btn-full">Subir comprobante</button>
+<a href="Tienda-Confirmacion.dc.html" class="t-btn-sec m-btn-full" style="min-height: 52px">Enviarlo por WhatsApp</a>
+</section>
+</sc-if>
+
+<sc-if value="{{isMp}}" hint-placeholder-val="{{ false }}">
+<section class="m-wrap" style="padding-block: 16px 0">
+<div class="m-box" style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600">Pago aprobado con Mercado Pago</span>
+<span class="m-p" style="font-size: 14px">Pagaste $ 56.900 en 1 cuota. En el resumen de tu tarjeta figura TESERA.</span>
+</div>
+</section>
+</sc-if>
+
+<section aria-labelledby="h-ped" class="m-wrap" style="padding-block: 28px 0; display: flex; flex-direction: column; gap: 12px">
+<h2 id="h-ped" class="m-h3">Tu pedido #1234</h2>
+<div class="m-row"><span class="m-row-k">Tanda 1 · Hoy</span><span>Gel lubricante × 1</span></div>
+<div class="m-row"><span class="m-row-k">Tanda 2 · Llega después</span><span>Vibrador Nocturno × 1</span></div>
+<div class="m-row"><span class="m-row-k">Entrega</span><span>Cadete en Mar del Plata</span></div>
+<hr class="m-div">
+<div class="m-row" style="align-items: center"><span style="font-weight: 600">Total</span><span style="font-size: 20px; font-weight: 600">{{total}}</span></div>
+</section>
+
+<section class="m-wrap" style="padding-block: 24px 32px; display: flex; flex-direction: column; gap: 12px">
+<div class="m-box" style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600">Te escribimos con asuntos neutros</span>
+<span class="m-p" style="font-size: 14px">Por ejemplo: «Tu pedido #1234 está en camino». Nunca ponemos nombres de producto en el asunto.</span>
+</div>
+<a href="Tienda-Seguimiento.dc.html" class="t-btn m-btn-full">Seguir mi pedido</a>
+<a href="Tienda-Home.dc.html" class="t-btn-sec m-btn-full" style="min-height: 52px">Volver a la tienda</a>
+</section>
+</main>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"claro","options":["claro","discreto"],"section":"Modo"},"method":{"editor":"enum","default":"transfer","options":["transfer","mp"],"section":"Pago"},"$preview":{"width":390,"height":1900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const d = this.props.theme === 'discreto';
+    const transfer = (this.props.method || 'transfer') !== 'mp';
+    const copied = s.copied || '';
+    // Datos a completar con los reales de la cuenta
+    const defs = [
+      ['Titular', '[TITULAR DE LA CUENTA]'], ['Banco', '[BANCO]'], ['CBU', '[CBU, 22 DÍGITOS]'],
+      ['Alias', '[ALIAS]'], ['CUIT/CUIL', '[CUIT/CUIL]'], ['Monto', '$ 51.460']
+    ];
+    const fields = defs.map((f) => ({
+      k: f[0], v: f[1],
+      label: copied === f[0] ? 'Copiado' : 'Copiar',
+      aria: 'Copiar ' + f[0].toLowerCase(),
+      copy: () => this.setState({ copied: f[0] })
+    }));
+    return {
+      theme: d ? 'discreto' : 'claro', brand: d ? 'Tienda' : 'Tésera',
+      isTransfer: transfer, isMp: !transfer,
+      statusCls: transfer ? 'b b-enc' : 'b b-ok',
+      status: transfer ? 'Pendiente de pago · lo verificamos y despachamos' : 'Pagado · estamos preparando tu pedido',
+      title: transfer ? 'Falta tu transferencia' : '¡Listo, recibimos tu pedido!',
+      lead: transfer
+        ? 'Reservamos tu pedido por 24 h. Cuando veamos el pago, lo despachamos.'
+        : 'Te mandamos un mail con el detalle. El asunto no menciona nada del contenido.',
+      fields,
+      total: transfer ? '$ 51.460' : '$ 56.900'
+    };
+  }
+}
+</script>
+</body>
+</html>

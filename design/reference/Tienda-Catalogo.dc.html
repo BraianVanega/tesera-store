@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<title>Tésera · Catálogo</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/954355a75b613403837594d1b08fa551">
+<link rel="stylesheet" href="./tienda.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&amp;family=Marcellus&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.f-chip{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;background:transparent;color:var(--text);border:1px solid var(--border);font:500 14px var(--font-body);cursor:pointer;white-space:nowrap;transition:border-color 200ms var(--ease)}
+.f-chip:hover{border-color:var(--accent)}
+.f-chip[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font-family: var(--font-body)">
+
+<header style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; min-height: 64px; padding-inline: 20px 8px; background: var(--bg); border-bottom: 1px solid var(--border)">
+<a href="Tienda-Home.dc.html" class="t-link" style="font-family: var(--font-display); font-size: 18px; letter-spacing: 0.3em; text-transform: uppercase">{{brand}}</a>
+<span style="justify-self: end; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border: 1px solid var(--border); font: 500 13px var(--font-body)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+<span>CP 7600 · Mar del Plata</span>
+</span>
+<a href="Tienda-Carrito.dc.html" class="m-icon-btn" aria-label="Carrito, 2 productos">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+<span style="position: absolute; top: 4px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--accent); color: var(--bg); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">2</span>
+</a>
+</header>
+
+<main style="flex: 1">
+<div class="m-wrap" style="padding-block: 24px 8px; display: flex; flex-direction: column; gap: 16px">
+<nav aria-label="Ruta" style="font-size: 13px; color: var(--text-2)"><a href="Tienda-Home.dc.html" class="t-link" style="color: var(--text-2)">Inicio</a> / Catálogo</nav>
+<h1 class="m-h2" style="font-size: 32px">Sex shop · catálogo</h1>
+<p class="m-p">Elegí con calma. Los envíos son discretos, en caja neutra.</p>
+</div>
+
+<section aria-label="Filtros" style="padding-block: 8px 16px; border-bottom: 1px solid var(--border)">
+<div class="m-wrap" style="display: flex; flex-direction: column; gap: 14px">
+<div role="group" aria-label="Entrega" style="display: flex">
+<button type="button" class="f-chip" aria-pressed="{{hoyPressed}}" onClick="{{toggleHoy}}" style="gap: 10px; width: 100%; justify-content: space-between">
+<span>Entrega hoy en Mar del Plata</span>
+<span style="display: inline-block; width: 18px; height: 18px; border: 1.5px solid currentColor; text-align: center; line-height: 15px; font-size: 14px">{{hoyMark}}</span>
+</button>
+</div>
+</div>
+<div role="group" aria-label="Categoría" style="display: flex; gap: 8px; overflow-x: auto; padding: 12px 20px 4px">
+<sc-for list="{{cats}}" as="c" hint-placeholder-count="7">
+<button type="button" class="f-chip" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.label}}</button>
+</sc-for>
+</div>
+<div role="group" aria-label="Precio" style="display: flex; gap: 8px; overflow-x: auto; padding: 8px 20px 0">
+<sc-for list="{{prices}}" as="r" hint-placeholder-count="4">
+<button type="button" class="f-chip" aria-pressed="{{r.pressed}}" onClick="{{r.pick}}">{{r.label}}</button>
+</sc-for>
+</div>
+</section>
+
+<section aria-label="Productos" class="m-wrap" style="padding-block: 20px 40px">
+<p class="m-p" style="margin-bottom: 16px" aria-live="polite">{{count}}</p>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{products}}" as="p" hint-placeholder-count="6">
+<a href="Tienda-Ficha.dc.html" class="t-card" style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--surface); border: 1px solid var(--border); color: var(--text); text-decoration: none; opacity: {{p.op}}">
+<div class="m-ph" style="aspect-ratio: 1 / 1"><div class="m-ph-in"></div></div>
+<span class="{{p.badgeCls}}" style="align-self: flex-start; font-size: 11px">{{p.badge}}</span>
+<span style="font-family: var(--font-display); font-size: 16px; line-height: 1.2">{{p.name}}</span>
+<sc-if value="{{p.hasPrice}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 16px; font-weight: 600">{{p.transf}}</span>
+<span style="font-size: 12px; color: var(--accent); font-weight: 600">10% OFF con transferencia</span>
+<span class="pr-lista" style="font-size: 12px">Lista {{p.lista}}</span>
+</div>
+</sc-if>
+</a>
+</sc-for>
+</div>
+</section>
+</main>
+
+<footer class="t-dark" style="background: var(--bg); color: var(--text); border-top: 1px solid var(--border)">
+<div class="m-wrap" style="padding-block: 24px"><p style="margin: 0; font-size: 12px; color: var(--text-2)">© 2026 Tésera · Sitio para mayores de 18 años · Argentina</p></div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"claro","options":["claro","discreto"],"section":"Modo"},"$preview":{"width":390,"height":1900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const d = this.props.theme === 'discreto';
+    const cat = s.cat || 'Todo';
+    const price = s.price || 'all';
+    const hoy = !!s.hoy;
+    const money = (n) => '$ ' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+    // [nombre, categoría, precio de lista, consumible, stock local]
+    const items = [
+      ['Succionador Brasa recargable', 'Succionadores', 54900, false, true],
+      ['Succionador Mini', 'Succionadores', 33900, false, false],
+      ['Vibrador Nocturno de silicona', 'Vibradores', 42500, false, false],
+      ['Vibrador de bala', 'Vibradores', 18900, false, true],
+      ['Plug anal de inicio', 'Anal', 24900, false, true],
+      ['Gel lubricante base agua 100 ml', 'Lubricantes', 11900, true, true],
+      ['Aceite de masaje tibio', 'Lubricantes', 18900, true, true],
+      ['Conjunto de encaje', 'Lencería', 29900, false, false],
+      ['Kit Primeros pasos', 'Kits', 49900, false, true]
+    ];
+    const inPrice = (p) => price === 'all' || (price === 'a' && p < 20000) || (price === 'b' && p >= 20000 && p < 40000) || (price === 'c' && p >= 40000);
+    const shown = items.filter((it) => (cat === 'Todo' || it[1] === cat) && inPrice(it[2]) && (!hoy || it[4]));
+    const products = shown.map((it) => {
+      const a = it[4] ? ['b b-hoy', 'Hoy en Mar del Plata'] : ['b b-enc', 'Llega en 5 a 10 días'];
+      return { name: it[0], badgeCls: a[0], badge: a[1], hasPrice: true, op: '1', lista: money(it[2]), transf: money(Math.round(it[2] * 0.9)) };
+    });
+
+    const cats = ['Todo', 'Succionadores', 'Vibradores', 'Anal', 'Lubricantes', 'Lencería', 'Kits'].map((c) => ({
+      label: c, pressed: cat === c ? 'true' : 'false', pick: () => this.setState({ cat: c })
+    }));
+    const prices = [['all', 'Todos los precios'], ['a', 'Hasta $ 20.000'], ['b', '$ 20.000 a $ 40.000'], ['c', 'Más de $ 40.000']].map((r) => ({
+      label: r[1], pressed: price === r[0] ? 'true' : 'false', pick: () => this.setState({ price: r[0] })
+    }));
+
+    return {
+      theme: d ? 'discreto' : 'claro',
+      brand: d ? 'Tienda' : 'Tésera',
+      cats, prices, products,
+      count: products.length + (products.length === 1 ? ' producto' : ' productos'),
+      hoyPressed: hoy ? 'true' : 'false',
+      hoyMark: hoy ? '✓' : '',
+      toggleHoy: () => this.setState({ hoy: !hoy })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+// Parámetros de negocio. Cambiar acá, nunca hardcodear en componentes.
+
+export type Zone = "MDP" | "AMBA" | "INTERIOR";
+
+export const config = {
+  /** Descuento por pagar con transferencia, sobre precio de lista (%). */
+  transferDiscountPct: 10,
+  /** % de la ganancia neta que cobra Eric (operador, no socio). Acuerdo transitorio: puede cambiar. */
+  operatorProfitSharePct: 40,
+
+  /** Umbral de envío gratis, sobre subtotal A PRECIO DE LISTA (pesos). */
+  freeShipping: {
+    MDP: 15_000,
+    CABA: 30_000,
+    GBA: 40_000,
+    INTERIOR: null as number | null, // sin envío gratis por ahora
+  },
+
+  /** Código postal de Mar del Plata y zona. */
+  mdpPostalRange: { from: 7600, to: 7612 },
+
+  /** CABA por CP numérico (C1000–C1499). El resto de AMBA se considera GBA. */
+  cabaPostalRange: { from: 1000, to: 1499 },
+
+  /** Horas de reserva de una transferencia antes de cancelar el pedido. */
+  transferHoldHours: 24,
+
+  /** Stock local por debajo del cual el pedido semanal sugiere reponer. */
+  lowStockThreshold: 2,
+
+  /** Cargo de acondicionamiento de SM en dropshipping, POR PEDIDO (pesos). Confirmado 25/11/2026. */
+  smDropshipFeePerOrder: 2_300,
+
+  /** Margen mínimo (% sobre el subtotal de lista) por pedido dropship. TODO(brai): definir. */
+  minDropshipMarginPct: 25,
+
+  /** Costos fijos mensuales que se descuentan en la liquidación (pesos). */
+  fixedMonthlyCosts: [{ name: "Abono SexShopMayorista", amount: 50_000 }],
+
+  /** Texto de plazos por fuente/zona (los usa availability()). */
+  delivery: {
+    LOCAL: "Hoy en Mar del Plata",
+    ENCARGO: "Llega en 5 a 10 días", // ENCARGO es término interno; al cliente nunca se le dice "por encargo"
+    DROPSHIP_AMBA: "Llega en 48 h", // envío dropship de SM (Moova Flex). Confirmado por Brai 25/11
+    DROPSHIP_INTERIOR: "Envío 3 a 6 días",
+  },
+} as const;

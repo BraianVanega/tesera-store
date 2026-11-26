@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<title>Tésera · Seguimiento</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/954355a75b613403837594d1b08fa551">
+<link rel="stylesheet" href="./tienda.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&amp;family=Marcellus&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font-family: var(--font-body)">
+
+<header style="display: flex; align-items: center; min-height: 64px; padding-inline: 20px; background: var(--bg); border-bottom: 1px solid var(--border)">
+<a href="Tienda-Home.dc.html" class="t-link" style="font-family: var(--font-display); font-size: 18px; letter-spacing: 0.3em; text-transform: uppercase">{{brand}}</a>
+</header>
+
+<main style="flex: 1">
+<section class="m-wrap" style="padding-block: 28px 8px; display: flex; flex-direction: column; gap: 12px">
+<p class="m-eyebrow">Pedido #1234</p>
+<h1 class="m-h2" style="font-size: 32px">{{title}}</h1>
+<span class="{{badgeCls}}" style="align-self: flex-start">{{badge}}</span>
+</section>
+
+<sc-if value="{{cancelled}}" hint-placeholder-val="{{ false }}">
+<section class="m-wrap" style="padding-block: 16px 0">
+<div class="m-box" style="border-style: dashed; display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600">Se venció el plazo de pago</span>
+<span class="m-p" style="font-size: 14px">Pasaron 24 h sin recibir la transferencia, así que cancelamos el pedido y liberamos el stock. Si ya pagaste, escribinos con el comprobante.</span>
+</div>
+<a href="Tienda-Catalogo.dc.html" class="t-btn m-btn-full" style="margin-top: 16px">Volver a armar mi pedido</a>
+</section>
+</sc-if>
+
+<sc-if value="{{active}}" hint-placeholder-val="{{ true }}">
+<section aria-labelledby="h-ped" class="m-wrap" style="padding-block: 24px 0; display: flex; flex-direction: column; gap: 18px">
+<h2 id="h-ped" class="m-h3">Estado del pedido</h2>
+<ol class="m-tl">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="5">
+<li class="{{s.cls}}" aria-current="{{s.current}}">
+<span class="m-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: {{s.tick}}"><path d="m5 12 5 5 9-10"/></svg></span>
+<span style="display: flex; flex-direction: column; gap: 2px; padding-top: 1px"><span style="font-weight: 600">{{s.label}}</span><span style="font-size: 14px; color: var(--text-2)">{{s.note}}</span></span>
+</li>
+</sc-for>
+</ol>
+<sc-if value="{{hasCode}}" hint-placeholder-val="{{ false }}">
+<div class="m-box" style="display: flex; flex-direction: column; gap: 4px"><span class="pr-lista">Código de seguimiento</span><span style="font-weight: 600; font-size: 17px; letter-spacing: 0.04em">[CÓDIGO DE SEGUIMIENTO]</span></div>
+</sc-if>
+</section>
+
+<section aria-labelledby="h-enc" class="m-wrap" style="padding-block: 32px 0; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px"><h2 id="h-enc" class="m-h3">Llega después</h2><span class="b b-enc">5 a 10 días</span></div>
+<p class="m-p" style="font-size: 14px">El Vibrador Nocturno viaja aparte. Te avisamos cuando esté listo para entregar.</p>
+<ol class="m-tl">
+<sc-for list="{{encSteps}}" as="s" hint-placeholder-count="3">
+<li class="{{s.cls}}" aria-current="{{s.current}}">
+<span class="m-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: {{s.tick}}"><path d="m5 12 5 5 9-10"/></svg></span>
+<span style="display: flex; flex-direction: column; gap: 2px; padding-top: 1px"><span style="font-weight: 600">{{s.label}}</span><span style="font-size: 14px; color: var(--text-2)">{{s.note}}</span></span>
+</li>
+</sc-for>
+</ol>
+</section>
+</sc-if>
+
+<section class="m-wrap" style="padding-block: 32px">
+<div class="m-box" style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600">Avisos privados</span>
+<span class="m-p" style="font-size: 14px">Cada novedad llega con un asunto neutro, como «Tu pedido #1234 está en camino». Sin nombres de producto.</span>
+</div>
+</section>
+</main>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"claro","options":["claro","discreto"],"section":"Modo"},"at":{"editor":"enum","default":"2","options":["0","1","2","3","4","cancelado"],"section":"Estado"},"$preview":{"width":390,"height":1750}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const d = this.props.theme === 'discreto';
+    const raw = String(this.props.at === undefined ? '2' : this.props.at);
+    const cancelled = raw === 'cancelado';
+    const at = cancelled ? -1 : Number(raw);
+    const defs = [
+      ['Pendiente de pago', 'Esperamos tu pago para seguir.'],
+      ['Pagado', 'Recibimos tu pago.'],
+      ['En preparación', 'Armamos tu caja neutra.'],
+      ['Enviado', 'Va en camino. Ya tenés el código de seguimiento.'],
+      ['Entregado', 'Tu pedido llegó.']
+    ];
+    const mk = (defsX, idx) => defsX.map((x, i) => ({
+      label: x[0], note: i === idx ? x[1] : (i < idx ? 'Listo' : ''),
+      cls: i < idx ? 'done' : (i === idx ? 'now' : ''),
+      current: i === idx ? 'step' : 'false',
+      tick: i < idx ? 'block' : 'none'
+    }));
+    const enc = [
+      ['Encargado', 'Lo pedimos al mayorista.'],
+      ['En camino a Mar del Plata', 'Viaja hacia nosotros.'],
+      ['Listo para entregar', 'Coordinamos la entrega con el cadete.']
+    ];
+    const encAt = Math.min(Math.max(at, 1), 2) - 1;
+    return {
+      theme: d ? 'discreto' : 'claro', brand: d ? 'Tienda' : 'Tésera',
+      cancelled, active: !cancelled,
+      title: cancelled ? 'Pedido cancelado' : (at >= 4 ? 'Tu pedido llegó' : 'Tu pedido está en marcha'),
+      badge: cancelled ? 'Cancelado' : defs[at][0], badgeCls: cancelled ? 'b b-no' : (at >= 4 ? 'b b-ok' : 'b b-hoy'),
+      steps: mk(defs, at), encSteps: mk(enc, encAt),
+      hasCode: at >= 3
+    };
+  }
+}
+</script>
+</body>
+</html>

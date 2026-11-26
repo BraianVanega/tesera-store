@@ -1,0 +1,773 @@
+11/24/26, 8:59 AM                                              API Dropshipping v1 · Sex Shop Mayorista
+
+
+
+
+     API Dropshipping v1
+     Última actualización de esta documentación: 19/11/2026 15:42
+
+
+     Consultá stock y precios e inyectá tus pedidos en nuestro sistema de forma automática desde tu
+     tienda (MercadoLibre, TiendaNube, PrestaShop, WooCommerce o carrito propio).
+
+
+         Contenido:
+         Autenticación           Límites    Stock y productos       Sync incremental             Provincias   Cotizar envío
+         Servicios de envío             Sucursales de Correo      Crear pedido           Estado del pedido      Errores
+         Ejemplos          Changelog
+
+
+
+
+     Autenticación
+
+     Toda llamada requiere tu API Key en el header Authorization . La generás desde tu cuenta (panel
+     de dropshipping); se muestra una sola vez, guardala en un lugar seguro.
+
+
+        Authorization: Bearer sm_tu_clave_secreta
+
+
+
+     Base URL de producción: https://www.sexshopmayorista.com
+
+     Las respuestas siempre tienen la forma:
+
+
+        { "ok": true,            "data": { ... } }             // exito
+        { "ok": false, "error": "mensaje" }                    // error
+
+
+
+
+     Límites de uso
+
+     Hay dos topes por cliente. Al acercarte, mirá los headers de cada respuesta:
+
+
+       Límite           Header                                                              Al excederlo
+
+       Por                X-RateLimit-Limit / X-RateLimit-Remaining                          429 + Retry-After (segundos)
+       minuto
+
+       Por día            X-RateLimit-Daily-Limit / X-RateLimit-                             429 + Retry-After (hasta
+                        Daily-Remaining                                                     medianoche)
+
+
+
+https://www.sexshopmayorista.com/api/docs                                                                                     1/14
+11/24/26, 8:59 AM                                 API Dropshipping v1 · Sex Shop Mayorista
+
+     Un sync de catálogo razonable usa decenas de requests por día. Si necesitás más, escribinos. Podés
+     ver tu consumo en tu cuenta.
+
+
+
+
+     Stock y productos
+
+       GET      /api/v1/stock — lista de stock. GET   /api/v1/stock/{sku} — un SKU.
+
+
+       GET      /api/v1/products — catálogo completo (con fotos). GET              /api/v1/products/{sku} — un
+     producto.
+
+       GET      /api/v1/products/modificados?desde=ISO — sync incremental (solo lo que cambió).
+
+
+       GET      /api/v1/categories — marcas disponibles.
+
+     Solo se listan productos habilitados para dropshipping, activos y no eliminados.
+
+
+     Importante: el stock NO es el real
+
+     Por política nunca exponemos el stock real. El campo stock es un número entero calculado igual
+     que el que publicamos en MercadoLibre y TiendaNube: StockRemanente − margen de
+     seguridad − reservas , con piso 0 y tope 20 . Es decir: si hay mucho stock vas a ver 20 aunque
+     haya más.
+
+
+        stock                        estado               Significa
+
+        4..20                        disponible           Hay stock (topeado en 20)
+
+        1..3                         bajo_stock           Quedan pocas unidades
+
+        0                            agotado              Sin stock vendible
+
+
+      precioSugeridoPublico = precio sugerido de venta al público. costoCliente = lo que pagás vos
+     (ese precio menos el descuento de tu segmento). iva = % de IVA del artículo. Nunca se expone
+     nuestro costo.
+
+     Campañas para revendedores: mientras un producto está en una campaña para revendedores con
+     un descuento mayor que el tuyo, costoCliente ya viene con ese descuento y el producto trae
+      campania con su nombre , su descuentoPct (sobre precioSugeridoPublico ) y la fecha hasta
+     (último día incluido). Sin campaña, campania es null . El pedido que entra mientras dura la
+     campaña se cobra con ese descuento. El comienzo o el fin de una campaña no cambia
+      ultimaActualizacion : si usás costoCliente , volvé a leer /products completo una vez por día.
+
+
+     Ejemplo de item de /api/v1/products :
+
+
+        {
+            "sku": "ABC123",
+https://www.sexshopmayorista.com/api/docs                                                                        2/14
+11/24/26, 8:59 AM                                  API Dropshipping v1 · Sex Shop Mayorista
+
+            "nombre": "Producto de ejemplo",
+            "upc": "7790000000000",
+            "marca": "Marca X",
+            "precioSugeridoPublico": 24990.00,
+            "costoCliente": 18742.50,
+            "campania": null,
+            "iva": 21.00,
+            "stock": 12,
+            "estado": "disponible",
+            "permiteFlex": true,
+            "pesoGramos": 350,
+            "dimensionesCm": { "largo": 20, "ancho": 12, "alto": 5 },
+            "imagenes": [
+               { "orden": 1, "url": "https://www.sexshopmayorista.com/pi/1400x1400_Webp/abc...ha
+               { "orden": 2, "url": "https://www.sexshopmayorista.com/pi/1400x1400_Webp/def...ha
+            ],
+            "ultimaActualizacion": "2026-06-25T16:35:10"
+        }
+
+
+
+     Fotos de producto
+
+     Cada producto trae un array imagenes ordenado ( orden 1 = principal), con la url absoluta de
+     cada foto. Se expone un único tamaño ( .webp 1400x1400): suficiente para cualquier marketplace,
+     evita multiplicar archivos.
+
+     Descarga de miles de fotos sin saturar: el nombre del archivo incluye un hash de contenido, asi
+     que la URL solo cambia si cambia la imagen. Descargate cada URL una sola vez y guardala; en las
+     próximas sincronizaciones salte las que ya tenés (misma URL = misma foto). Las imágenes las sirve
+     nuestro CDN con cache larga, no consultes la API para re-bajarlas.
+
+
+     Sincronización incremental (recomendado)
+
+     Cada producto trae ultimaActualizacion (ISO 8601). Refleja cualquier cambio de datos, precio o
+     fotos — NO incluye stock (el stock cambia todo el tiempo y se sincroniza aparte por /stock ) ni el
+     comienzo o fin de una campaña para revendedores (para eso, una lectura completa de /products
+     por día).
+
+     Para no re-bajar el catálogo entero cada vez, usá:
+
+
+        GET /api/v1/products/modificados?desde=2026-06-24T00:00:00
+
+
+
+     Devuelve solo los productos cuyo ultimaActualizacion ≥ desde . Acepta también page y
+      pageSize . Si te falta desde -> 400 .
+
+
+     Recomendación de uso: en tu primera sync llamá a /products entero (paginado). Guardate la
+     fecha máxima que viste en ultimaActualizacion . Después consultá /products/modificados?
+https://www.sexshopmayorista.com/api/docs                                                                 3/14
+11/24/26, 8:59 AM                                     API Dropshipping v1 · Sex Shop Mayorista
+
+     desde= con esa fecha cada hora / día (lo que necesites). Para stock corré /stock aparte, más
+     seguido.
+
+
+     Paginación
+
+     Todos los listados ( /products , /products/modificados y /stock ) siempre paginan. Si no
+     enviás ?page= / ?pageSize= tomás la primera página con pageSize=50 por defecto. pageSize
+     máximo: 200.
+
+     La respuesta trae todo lo que necesitás para iterar el catálogo entero:
+
+
+        {
+            "ok": true,
+            "data": {
+                "total": 1921,              // total de productos
+                "page": 1,
+                "pageSize": 50,
+                "totalPaginas": 39,         // recorre desde 1 hasta este numero
+                "items": [ ... ]
+            }
+        }
+
+
+
+     Si pedis una página fuera de rango, total sigue reflejando el catálogo real (para que sepas iterar
+     correctamente) y items queda vacío.
+
+     Cómo recorrer todo el catálogo
+
+     Tomá totalPaginas de la primera respuesta y armá un loop:
+
+
+        // JavaScript / Node
+        let page = 1;
+        const r1 = await fetch('https://www.sexshopmayorista.com/api/v1/products?page=1&pageS
+            { headers: { Authorization: 'Bearer sm_tu_clave' } });
+        const { totalPaginas } = (await r1.json()).data;
+        // procesar la pagina 1...
+
+
+        for (let p = 2; p <= totalPaginas; p++) {
+            const r = await fetch('https://www.sexshopmayorista.com/api/v1/products?page=' + p
+                { headers: { Authorization: 'Bearer sm_tu_clave' } });
+            const { items } = (await r.json()).data;
+            // procesar items...
+        }
+
+
+
+     Alternativa robusta — no depende de totalPaginas , útil si el catálogo cambia durante la
+     sincronización:
+
+https://www.sexshopmayorista.com/api/docs                                                                 4/14
+11/24/26, 8:59 AM                                        API Dropshipping v1 · Sex Shop Mayorista
+
+
+        let page = 1;
+        while (true) {
+            const r = await fetch('.../api/v1/products?page=' + page + '&pageSize=50', { ... })
+            const { items } = (await r.json()).data;
+            if (items.length === 0) break;
+            // procesar items...
+            page++;
+        }
+
+
+
+     Mismo patrón vale para /products/modificados?desde=&page=&pageSize= y /stock?
+     page=&pageSize= . Respetá el rate limit por minuto (60 req/min) — no necesitás meter pausas, los
+     round-trips ya espaciarán naturalmente.
+
+
+
+
+     Provincias
+
+       GET      /api/v1/provincias
+
+
+     Lista de provincias con su id . Es el mismo catálogo que usa nuestro sistema, así que mandarnos
+     el id (en vez del nombre escrito a mano) es la forma más segura de que el destino se interprete
+     igual al cotizar y al crear el pedido.
+
+
+        {
+            "ok": true,
+            "data": {
+                "total": 24,
+                "items": [
+                    { "id": 4,        "descripcion": "Buenos Aires" },
+                    { "id": 3,        "descripcion": "Capital Federal" },
+                    { "id": 8,        "descripcion": "Cordoba" }
+                ]
+            }
+        }
+
+
+
+     Usá ese id en destino.provinciaId (cotización) y en envio.provinciaId (creación del
+     pedido). Cambia muy poco: podés cachearlo.
+
+
+
+
+     Cotizar envío
+
+       POST         /api/v1/shipping/quotes
+
+     Devuelve las opciones de envío disponibles para un destino, de varias empresas a la vez (YIP/Flex,
+     Correo Argentino a domicilio o a sucursal, etc.) con su costo. Cotizá antes de crear el pedido y
+https://www.sexshopmayorista.com/api/docs                                                                 5/14
+11/24/26, 8:59 AM                                     API Dropshipping v1 · Sex Shop Mayorista
+
+     guardá el code de la opción elegida y el quoteId para mandarlos en el bloque envio al crear el
+     pedido. Es la misma cotización que usamos en nuestro propio carrito. Disponible solo si tu cuenta
+     tiene habilitado el despacho sin etiqueta.
+
+
+     Body
+
+
+        {
+            "destino": {
+               "calle": "Av. Siempre Viva", "numero": "742",
+               "localidad": "Lanus",
+               "provinciaId": 4,
+               "cp": "1824"
+            },
+            "items": [ { "sku": "ABC123", "cantidad": 2 } ]
+        }
+
+
+
+     Obligatorio: destino.cp (4 a 8 caracteres). provinciaId es el id de /api/v1/provincias (el
+     mismo que usás en el bloque envio al crear el pedido); si no lo mandás, usá destino.provincia
+     con el nombre.
+
+
+         Mandá siempre items . Con los artículos y cantidades reales calculamos el bulto con el peso
+         y las medidas de cada producto (y cuántas cajas hacen falta), que es exactamente lo mismo
+         que vamos a calcular cuando nos mandes el pedido. Además, solo las cotizaciones con
+            items devuelven quoteId (es lo que nos permite verificar que el precio congelado
+         corresponde a ese pedido). Como alternativa podés mandar "paquete": { "pesoGr": 2000,
+         "altoCm": 30, "anchoCm": 30, "largoCm": 30 } : te devolvemos las tarifas, pero sin
+            quoteId , y el costo del pedido se calculará de nuevo.
+
+
+
+
+     ¿Cotizo con el código postal o con la dirección completa?
+
+     Las dos cosas funcionan. Lo único obligatorio es destino.cp : podés cotizar con el CP solo, pero
+     no con la dirección sin CP. Ahora bien, no dan el mismo precio. Mismo destino y mismos artículos:
+
+
+       Qué mandás en destino                                             YIP / Flex              Correo
+
+        cp                                                               $ 8.200                 $ 21.700
+
+        cp + localidad + provinciaId                                     $ 8.200                 $ 21.700
+
+       + calle y numero                                                  $ 7.100                 $ 21.700
+
+       dirección sin cp                                                   400 — falta destino.cp
+
+
+
+
+https://www.sexshopmayorista.com/api/docs                                                                   6/14
+11/24/26, 8:59 AM                                        API Dropshipping v1 · Sex Shop Mayorista
+
+     Con la calle y la altura podemos calcular el envío exacto en vez de una estimación por zona, y ahí el
+     envío rápido baja bastante. La localidad y la provincia no cambian el precio (sirven para la etiqueta).
+     Correo cotiza por código postal, así que su tarifa no se mueve.
+
+
+         Flujo recomendado: cotizá dos veces.
+
+          1. En el carrito, cuando tu comprador solo puso el CP: cotizá con cp para mostrarle las
+                opciones.
+          2. En el checkout, ya con la dirección cargada: volvé a cotizar con calle y numero , y usá
+                ese quoteId para crear el pedido.
+         Si guardás el quoteId del paso 1, te cobramos ese precio — que es el estimado, más caro
+         que el real.
+
+
+
+     Envío a sucursal
+
+     Si el comprador va a retirar en una sucursal, agregá destino.agencyId (con
+      destino.provinciaId ) y cotizamos contra la sucursal elegida — que es a donde realmente
+     despachamos. Las opciones a sucursal cotizadas sin agencyId te sirven para mostrar un precio
+     orientativo, pero su quoteId no va a aplicar al crear el pedido (el destino real es otro). Flujo: cotizás
+     → el comprador elige "a sucursal" → le mostrás las sucursales → volvés a cotizar con
+      destino.agencyId → creás el pedido con ese quoteId y el mismo envio.agencyId .
+
+
+     Respuesta
+
+
+        {
+            "ok": true,
+            "data": {
+                 "quoteId": "q_9f2c8a71b04e4d6f8c1e5a3b7d904f21",
+                 "venceEn": "2026-07-29T18:40:00",
+                 "paquete": { "calculadoDeItems": true, "bultos": 1, "pesoGr": 880, "pesoTotalGr":
+                                     "largoCm": 40, "anchoCm": 40, "altoCm": 40 },
+                 "total": 3,
+                 "options": [
+                     { "carrier": "MOOVA",       "carrierNombre": "YIP / Flex",                     "servicio": "FLEX",
+                     { "carrier": "CORREO", "carrierNombre": "Correo Argentino", "servicio": "CP",
+                     { "carrier": "CORREO", "carrierNombre": "Correo Argentino", "servicio": "CP",
+                 ]
+            }
+        }
+
+
+
+     El precio es el valor final del envío, con impuestos incluidos y ya redondeado: es el importe que te
+     vamos a facturar por ese envío, y el que normalmente le trasladarías a tu comprador. Está en pesos
+     argentinos.
+
+
+https://www.sexshopmayorista.com/api/docs                                                                                 7/14
+11/24/26, 8:59 AM                                           API Dropshipping v1 · Sex Shop Mayorista
+
+     Que el cliente pague lo mismo que te cobramos
+
+     La respuesta trae un quoteId con vigencia ( venceEn , 24 h por defecto). Si al crear el pedido nos
+     mandás ese quoteId junto con el shippingCode , te cobramos exactamente el precio cotizado,
+     aunque el transportista haya cambiado su tarifa en el medio. Es la forma de garantizar que el envío
+     que le cobraste a tu comprador y el que te facturamos sean el mismo número.
+
+
+       Qué mandás en envio                                        Qué te cobramos
+
+        shippingCode + quoteId vigente                            El precio exacto que te cotizamos.
+
+       Solo shippingCode                                          Se recalcula al momento del pedido (puede diferir si
+                                                                  cambió la tarifa).
+
+        quoteId vencido, de otro destino, o de un                 Se recalcula y te avisamos con un warning en la
+       pedido más chico                                           respuesta.
+
+       Nada de eso                                                El pedido entra sin costo de envío.
+
+
+     Por seguridad el quoteId solo vale para tu cuenta y para el mismo destino que cotizaste (código
+     postal y provincia; en envío a sucursal, la misma sucursal). Además la cotización tiene que cubrir el
+     pedido: si termina necesitando más bultos, más peso o una caja más grande, recalculamos. Si el
+     pedido resulta más chico, te respetamos igual el precio cotizado. Nunca tomamos un importe de
+     envío enviado por vos: o es el que te cotizamos, o lo calculamos nosotros.
+
+
+
+
+     Servicios de envío (qué significa cada campo)
+
+     Cada opción que devolvemos combina una empresa ( carrier ), un servicio ( servicio ) y una
+     forma de entrega ( tipoEntrega ). El code es la combinación de las tres y es lo único que tenés
+     que guardar para pedir esa opción.
+
+
+       Campo                    Valor       Qué es
+
+        carrier                   MOOVA     YIP / Flex: mensajería propia para CABA y GBA, entrega en el día o al día
+                                            siguiente.
+
+                                  CORREO    Correo Argentino: cobertura en todo el país.
+
+        servicio                  FLEX      Envío rápido de YIP dentro de su zona de cobertura.
+
+                                  CP        Correo Clásico (Clásico Paquete): la opción económica, más días de
+                                            tránsito.
+
+                                  EP        Correo Expreso (Expreso Paquete): más rápido y más caro que el
+                                            Clásico.
+
+
+
+https://www.sexshopmayorista.com/api/docs                                                                                8/14
+11/24/26, 8:59 AM                                          API Dropshipping v1 · Sex Shop Mayorista
+
+
+        tipoEntrega               D         A domicilio del comprador.
+
+                                  S         A sucursal: el comprador la retira. Requiere envio.agencyId (ver
+                                            Sucursales).
+
+
+     Ejemplos de code : moova-flex (YIP a domicilio), ca-cp-dom (Correo Clásico a domicilio), ca-
+     cp-suc (Correo Clásico a sucursal), ca-ep-dom (Correo Expreso a domicilio).
+
+
+     Plazo de entrega
+
+     Cada opción trae plazoMinDias y plazoMaxDias : días hábiles estimados desde el despacho (no
+     incluyen el tiempo de preparación del pedido). Para YIP/Flex vas a ver 0 – 1 ; para Correo, el plazo
+     que informa la empresa para ese destino. Son estimaciones del transportista, no una garantía.
+
+
+     ¿Dos opciones iguales con precios distintos?
+
+     No debería pasar: el code es único dentro de una misma cotización. Si el transportista nos devuelve
+     dos tarifas que caen en la misma combinación de empresa + servicio + forma de entrega, te
+     mostramos una sola (la más conveniente). Si ves dos opciones que te parecen iguales, mirá el
+      code completo: van a diferir en el servicio ( cp vs ep ) o en la entrega ( -dom vs -suc ), y eso
+     también explica la diferencia de precio y de plazoMaxDias . Usá siempre el code para identificar
+     una opción; el nombre es solo texto para mostrar y puede cambiar.
+
+
+
+
+     Sucursales de Correo
+       GET      /api/v1/shipping/agencies?provinciaId=4&cp=1824
+
+
+     Sucursales de Correo Argentino que reciben paquetes. Necesitás este listado cuando el comprador
+     elige una opción a sucursal ( tipoEntrega: "S" , code terminado en -suc ): el codigo de la
+     sucursal elegida es el envio.agencyId del pedido. Es la misma lista que ve el comprador en
+     nuestro carrito.
+
+
+        {
+            "ok": true,
+            "data": {
+                "total": 2,
+                "items": [
+                    { "codigo": "1824A", "nombre": "Sucursal Lanus", "direccion": "Av. Hipolito Yri
+                    { "codigo": "1826B", "nombre": "Sucursal Remedios de Escalada", "direccion": "R
+                ]
+            }
+        }
+
+
+
+
+https://www.sexshopmayorista.com/api/docs                                                                      9/14
+11/24/26, 8:59 AM                                       API Dropshipping v1 · Sex Shop Mayorista
+
+     Obligatorio: provinciaId (ver Provincias). cp es opcional pero recomendado: acota la lista a las
+     sucursales cercanas y responde mucho más rápido. Si ese CP no tiene sucursales, devolvemos
+      total: 0 con un mensaje explicativo (probá con un CP cercano).
+
+
+
+
+     Crear pedido
+
+       POST         /api/v1/orders
+
+     Tu tienda hace este POST cuando se concreta una venta. El pedido cae en nuestro sistema igual que
+     los de MercadoLibre o TiendaNube, valorizado a tu costo de revendedor (el costoCliente ). Cómo
+     disparás el POST (webhook de tu plataforma, cron, etc.) lo definís vos.
+
+
+     Body
+
+
+        {
+            "externalOrderId": "SHOP-0001234",
+            "comprador":           { "nombre": "Juan Perez", "email": "juan@mail.com", "telefono": "1122
+            "envio": {
+               "nombre": "Juan Perez",
+               "calle": "Av. Siempre Viva", "numero": "742", "piso": "3 B",
+               "localidad": "Lanus", "codigoPostal": "1824",
+               "provincia": "Buenos Aires", "telefono": "1122334455"
+            },
+            "items": [ { "sku": "ABC123", "cantidad": 2 } ],
+            "totalVentaFinal": 49980.00,
+            "moneda": "ARS",
+            "notas": "opcional"
+        }
+
+
+
+     Obligatorios: externalOrderId , envio , items (cada item con sku y cantidad > 0).
+      totalVentaFinal es informativo: a vos te facturamos tu costo de revendedor ( costoCliente ), no
+     ese total.
+
+
+     Envío cotizado (opcional)
+
+     Si querés que despachemos nosotros con un costo de envío, primero cotizá con
+      /api/v1/shipping/quotes y agregá al bloque envio :
+
+               shippingCode : el code de la opción elegida (ej. "moova-flex" , "ca-cp-dom" ).
+               quoteId : el quoteId de esa cotización. Mandalo siempre: es lo que garantiza que te
+             cobremos el mismo importe que cotizaste.
+               provinciaId : id de provincia del destino (recomendado; si no, usamos el nombre en
+               provincia ).
+
+
+https://www.sexshopmayorista.com/api/docs                                                                  10/14
+11/24/26, 8:59 AM                                      API Dropshipping v1 · Sex Shop Mayorista
+
+                agencyId : solo si la opción es a sucursal ( code que termina en -suc ): el código de la
+                sucursal de Correo (ver Sucursales).
+
+     El envío se agrega como una línea más del pedido (junto con el cargo fijo de acondicionamiento).
+     Con quoteId vigente se usa el precio cotizado; sin él se calcula al momento del pedido. Sin
+      shippingCode , el pedido entra sin costo de envío, como hasta ahora (compatibilidad total). Usá el
+     mismo codigoPostal que cotizaste. Ejemplo del bloque envio con envío cotizado:
+
+
+        "envio": {
+            "nombre": "Juan Perez", "telefono": "1122334455",
+            "calle": "Av. Siempre Viva", "numero": "742", "piso": "3 B",
+            "localidad": "Lanus", "codigoPostal": "1824",
+            "provincia": "Buenos Aires", "provinciaId": 4,
+            "shippingCode": "ca-cp-dom",
+            "quoteId": "q_9f2c8a71b04e4d6f8c1e5a3b7d904f21"
+        }
+
+
+
+     Flujo recomendado: /shipping/quotes (con items ) → mostrás las opciones a tu comprador →
+     cobrás → /orders con shippingCode + quoteId + los mismos items .
+
+
+     Respuesta (201 Created)
+
+
+        {
+            "ok": true,
+            "data": {
+                "pedidoId": 123456,
+                "externalOrderId": "SHOP-0001234",
+                "estado": "INGESTADO",
+                "totalMayorista": 25000.00,
+                "warnings": [ "SKU ABC123: pediste 2 y hay 1 disponibles; puede demorar." ]
+            }
+        }
+
+
+
+     Idempotencia
+
+     Reenviar el mismo externalOrderId no duplica el pedido: devolvemos 200 con el mismo
+      pedidoId y "yaExistia": true . Podés reintentar sin miedo ante un timeout.
+
+
+     Stock insuficiente
+
+     Si pedís más de lo disponible, igual aceptamos el pedido (tu venta ya ocurrió) y agregamos un
+      warning . Para evitar sobreventa consultá /api/v1/stock antes de publicar.
+
+
+
+
+https://www.sexshopmayorista.com/api/docs                                                                  11/14
+11/24/26, 8:59 AM                                          API Dropshipping v1 · Sex Shop Mayorista
+
+
+
+     Estado del pedido
+       GET      /api/v1/orders/{externalOrderId}
+
+
+
+        {
+            "ok": true,
+            "data": {
+                "externalOrderId": "SHOP-0001234",
+                "pedidoId": 123456,
+                "estado": "INGESTADO",
+                "fechaIngesta": "2026-06-10T20:15:00",
+                "fulfillmentStatus": "despachado",
+                "trackingCode": "1234567890"
+            }
+        }
+
+
+
+
+     Códigos de error
+
+       HTTP          Caso
+
+        200          OK; o idempotente (el pedido ya existía)
+
+        201          Pedido creado
+
+        400          JSON inválido, faltan campos obligatorios, o desde ausente / mal formado
+
+        401          API Key faltante/inválida o cliente deshabilitado
+
+        404          (GET estado) externalOrderId desconocido
+
+        409          El pedido se está procesando o superó los reintentos; reintentar luego
+
+        422          Items con SKU inexistente o no habilitado para dropshipping (ver data.items )
+
+        429          Límite por minuto o diario excedido
+
+
+
+
+     Ejemplos
+
+     curl
+
+
+        curl -X POST https://www.sexshopmayorista.com/api/v1/orders \
+            -H "Authorization: Bearer sm_tu_clave" \
+
+https://www.sexshopmayorista.com/api/docs                                                             12/14
+11/24/26, 8:59 AM                                      API Dropshipping v1 · Sex Shop Mayorista
+
+           -H "Content-Type: application/json" \
+           -d '{"externalOrderId":"SHOP-1","envio":{"nombre":"Juan","calle":"Falsa","numero":"
+
+
+
+     PHP (WooCommerce / PrestaShop)
+
+
+        $payload = json_encode([
+           "externalOrderId" => $order_id,
+           "envio" => [ "nombre" => $nombre, "calle" => $calle, "numero" => $nro,
+                                 "localidad" => $loc, "codigoPostal" => $cp, "provincia" => $prov ],
+           "items" => [ [ "sku" => $sku, "cantidad" => $qty ] ],
+        ]);
+        $ch = curl_init("https://www.sexshopmayorista.com/api/v1/orders");
+        curl_setopt_array($ch, [
+           CURLOPT_POST => true,
+           CURLOPT_RETURNTRANSFER => true,
+           CURLOPT_HTTPHEADER => [ "Authorization: Bearer sm_tu_clave", "Content-Type: applica
+           CURLOPT_POSTFIELDS => $payload,
+        ]);
+        $resp = curl_exec ($ch);
+
+
+
+     JavaScript (Node / carrito propio)
+
+
+        await fetch("https://www.sexshopmayorista.com/api/v1/orders", {
+           method: "POST",
+           headers: {
+               "Authorization": "Bearer sm_tu_clave",
+               "Content-Type": "application/json"
+           },
+           body: JSON.stringify({
+               externalOrderId: order.id,
+               envio: { nombre, calle, numero, localidad, codigoPostal, provincia },
+               items: [{ sku, cantidad }]
+           })
+        });
+
+
+
+
+     Changelog
+              v1 — 2026-10-26: campañas para revendedores. En /products , /products/modificados y
+               /products/{sku} , costoCliente ya incluye la campaña vigente cuando su descuento es
+              mayor que el tuyo, y cada producto trae el campo nuevo campania ( null si no hay). Aditivo:
+              no cambia ningún campo existente.
+
+
+
+https://www.sexshopmayorista.com/api/docs                                                                   13/14
+11/24/26, 8:59 AM                                    API Dropshipping v1 · Sex Shop Mayorista
+
+             v1 — 2026-07-28: nuevos endpoints GET /api/v1/provincias (catálogo de provincias con su
+               id ) y GET /api/v1/shipping/agencies (sucursales de Correo, para el agencyId de las
+             opciones a sucursal). POST /api/v1/shipping/quotes acepta items para cotizar con el
+             peso y las medidas reales del pedido, informa el paquete calculado y devuelve un quoteId :
+             mandalo en envio.quoteId al crear el pedido y te cobramos exactamente el envío cotizado.
+             También acepta destino.agencyId para cotizar contra la sucursal de retiro elegida. Además,
+             el code de cada opción es único dentro de una cotización (ya no pueden llegar dos opciones
+             con el mismo code y distinto precio), y se documentó el significado de servicio
+             ( FLEX / CP / EP ) y de los plazos.
+             v1 — 2026-06-27: nuevo endpoint POST /api/v1/shipping/quotes que cotiza el envío a tu
+             cliente final en varias empresas a la vez (YIP/Flex, Correo a domicilio o a sucursal) y devuelve
+             el code de cada opción; POST /api/v1/orders acepta en envio los campos opcionales
+               shippingCode , provinciaId y agencyId para que despachemos nosotros con el costo
+             recalculado en el servidor (aditivo: sin shippingCode el pedido entra como hasta ahora).
+             v1 — 2026-06-25: cada producto trae imagenes (webp 1400x1400, un solo tamaño),
+               ultimaActualizacion y iva ; nuevo endpoint /products/modificados?desde= para sync
+             incremental; paginación opcional ( ?page=&pageSize= ) en /products , /stock y
+               /products/modificados .
+             v1 — 2026-06-11: alta de POST /api/v1/orders y GET
+             /api/v1/orders/{externalOrderId} ; tope diario de requests; panel de uso; costoCliente
+             (precio del segmento del revendedor).
+             v1 — inicial: GET de stock, products y categories.
+
+
+
+     ¿Dudas? Escribinos desde tu cuenta de revendedor.
+
+
+
+
+https://www.sexshopmayorista.com/api/docs                                                                       14/14
+

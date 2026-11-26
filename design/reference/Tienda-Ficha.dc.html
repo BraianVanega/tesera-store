@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<title>Tésera · Ficha de producto</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/954355a75b613403837594d1b08fa551">
+<link rel="stylesheet" href="./tienda.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&amp;family=Marcellus&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font-family: var(--font-body)">
+
+<header style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; min-height: 64px; padding-inline: 20px 8px; background: var(--bg); border-bottom: 1px solid var(--border)">
+<a href="Tienda-Home.dc.html" class="t-link" style="font-family: var(--font-display); font-size: 18px; letter-spacing: 0.3em; text-transform: uppercase">{{brand}}</a>
+<button type="button" onClick="{{cycleZone}}" aria-label="Cambiar zona de entrega" style="justify-self: end; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; background: none; border: 1px solid var(--border); color: var(--text); font: 500 13px var(--font-body); cursor: pointer">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+<span>{{zoneChip}}</span>
+</button>
+<a href="Tienda-Carrito.dc.html" class="m-icon-btn" aria-label="Carrito, 2 productos">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+<span style="position: absolute; top: 4px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--accent); color: var(--bg); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">2</span>
+</a>
+</header>
+
+<main style="flex: 1">
+<div class="m-wrap" style="padding-block: 16px 0"><nav aria-label="Ruta" style="font-size: 13px; color: var(--text-2)"><a href="Tienda-Catalogo.dc.html" class="t-link" style="color: var(--text-2)">← Succionadores</a></nav></div>
+
+<section aria-label="Fotos" style="padding: 12px 20px 0; display: flex; flex-direction: column; gap: 10px">
+<div class="m-ph" style="aspect-ratio: 1 / 1"><div class="m-ph-in"></div></div>
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px">
+<div class="m-ph" style="aspect-ratio: 1 / 1; border-color: var(--text)"><div class="m-ph-in"></div></div>
+<div class="m-ph" style="aspect-ratio: 1 / 1"><div class="m-ph-in"></div></div>
+<div class="m-ph" style="aspect-ratio: 1 / 1"><div class="m-ph-in"></div></div>
+<div class="m-ph" style="aspect-ratio: 1 / 1"><div class="m-ph-in"></div></div>
+</div>
+</section>
+
+<section class="m-wrap" style="padding-block: 24px; display: flex; flex-direction: column; gap: 16px">
+<span class="{{badgeCls}}" style="align-self: flex-start">{{badge}}</span>
+<h1 class="m-h2" style="font-size: 32px">Succionador Brasa recargable</h1>
+<p class="m-p">Estimulación suave, silencioso y recargable por USB. Silicona médica, resistente al agua.</p>
+
+<sc-if value="{{available}}" hint-placeholder-val="{{ true }}">
+<div class="m-box" style="display: flex; flex-direction: column; gap: 6px">
+<span class="pr-lista">Precio de lista (Mercado Pago o tarjeta)</span>
+<span style="font-size: 20px; font-weight: 500">{{lista}}</span>
+<hr class="m-div" style="margin-block: 6px">
+<span style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"><span style="font-size: 28px; font-weight: 600; line-height: 1.1">{{transf}}</span><span class="pr-off">10% OFF</span></span>
+<span style="font-size: 14px; color: var(--text-2)">pagando con transferencia</span>
+</div>
+</sc-if>
+<sc-if value="{{unavailable}}" hint-placeholder-val="{{ false }}">
+<div class="m-box" style="border-style: dashed"><p class="m-p">Este producto no se vende en tu zona.</p></div>
+</sc-if>
+
+<div class="m-box" style="display: flex; gap: 14px; align-items: flex-start">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-weight: 600">{{shipTitle}}</span>
+<span class="m-p" style="font-size: 14px">{{shipText}}</span>
+</div>
+</div>
+
+<sc-if value="{{available}}" hint-placeholder-val="{{ true }}">
+<button type="button" class="t-btn m-btn-full">Agregar al carrito</button>
+</sc-if>
+</section>
+
+<section aria-labelledby="h-disc" style="border-block: 1px solid var(--border); background: var(--surface)">
+<div class="m-wrap" style="padding-block: 24px; display: flex; flex-direction: column; gap: 14px">
+<h2 id="h-disc" class="m-h3">Tu compra es privada</h2>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{disc}}" as="d" hint-placeholder-count="3">
+<li style="display: flex; gap: 12px; align-items: flex-start; font-size: 15px; line-height: 1.45">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px; color: var(--accent)"><path d="m5 12 5 5 9-10"/></svg>
+<span>{{d.text}}</span>
+</li>
+</sc-for>
+</ul>
+</div>
+</section>
+
+<sc-if value="{{showAddons}}" hint-placeholder-val="{{ true }}">
+<section aria-labelledby="h-add" class="m-wrap" style="padding-block: 28px; display: flex; flex-direction: column; gap: 14px">
+<h2 id="h-add" class="m-h3">Agregalo a tu pedido</h2>
+<p class="m-p">Se entregan juntos, hoy en Mar del Plata.</p>
+<sc-for list="{{addons}}" as="a" hint-placeholder-count="2">
+<div style="display: grid; grid-template-columns: 72px 1fr auto; gap: 12px; align-items: center; padding: 10px; background: var(--surface); border: 1px solid var(--border)">
+<div class="m-ph" style="aspect-ratio: 1 / 1"><div class="m-ph-in"></div></div>
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-weight: 600; font-size: 15px">{{a.name}}</span><span style="font-size: 14px; color: var(--text-2)">{{a.price}}</span></div>
+<button type="button" class="t-btn-sec" aria-label="{{a.aria}}" style="padding: 0 14px">Agregar</button>
+</div>
+</sc-for>
+<p style="margin: 0; font-size: 12px; color: var(--text-2)">Los consumibles solo se venden en Mar del Plata.</p>
+</section>
+</sc-if>
+</main>
+
+<footer class="t-dark" style="background: var(--bg); color: var(--text); border-top: 1px solid var(--border)">
+<div class="m-wrap" style="padding-block: 24px"><p style="margin: 0; font-size: 12px; color: var(--text-2)">© 2026 Tésera · Sitio para mayores de 18 años · Argentina</p></div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"claro","options":["claro","discreto"],"section":"Modo"},"zone":{"editor":"enum","default":"mdp","options":["mdp","amba","interior"],"section":"Zona"},"$preview":{"width":390,"height":2350}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const d = this.props.theme === 'discreto';
+    const zone = s.zone || this.props.zone || 'mdp';
+    const order = ['mdp', 'amba', 'interior'];
+    const money = (n) => '$ ' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const price = 54900;
+    const chips = { mdp: 'CP 7600 · Mar del Plata', amba: 'CP 1425 · CABA', interior: 'CP 5000 · Interior' };
+    const badge = { mdp: ['b b-hoy', 'Hoy en Mar del Plata'], amba: ['b b-env', 'Envío 24–48 h'], interior: ['b b-env', 'Envío 3 a 6 días'] }[zone];
+    const ship = {
+      mdp: ['Lo recibís hoy con cadete', 'Entrega en el día en Mar del Plata. Envío gratis desde $ 15.000.'],
+      amba: ['Llega en 24 a 48 h a CABA', 'Gratis desde $ 30.000 en CABA y desde $ 40.000 en GBA. Si no, lo ves al elegir el envío.'],
+      interior: ['Llega en 3 a 6 días', 'Pagás el costo cotizado según tu CP. Lo ves antes de pagar.']
+    }[zone];
+    return {
+      theme: d ? 'discreto' : 'claro',
+      brand: d ? 'Tienda' : 'Tésera',
+      zoneChip: chips[zone],
+      cycleZone: () => this.setState({ zone: order[(order.indexOf(zone) + 1) % order.length] }),
+      badgeCls: badge[0], badge: badge[1],
+      available: true, unavailable: false,
+      lista: money(price), transf: money(Math.round(price * 0.9)),
+      shipTitle: ship[0], shipText: ship[1],
+      disc: [
+        { text: 'Caja 100% neutra, sin logos ni descripción del contenido.' },
+        { text: 'En el resumen de tu tarjeta figura TESERA.' },
+        { text: 'Nadie sabe qué compraste.' }
+      ],
+      showAddons: zone === 'mdp',
+      addons: [{ name: 'Gel lubricante base agua 100 ml', aria: "Agregar gel lubricante", price: money(11900) }, { name: 'Limpiador de juguetes 120 ml', aria: "Agregar limpiador de juguetes", price: money(8900) }]
+    };
+  }
+}
+</script>
+</body>
+</html>

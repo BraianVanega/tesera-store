@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<title>Tésera · Home</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/954355a75b613403837594d1b08fa551">
+<link rel="stylesheet" href="./tienda.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&amp;family=Marcellus&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.h-tab{background:none;border:0;padding:0;min-height:44px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;font:500 20px var(--font-body);letter-spacing:-0.02em}
+.h-dot{width:9px;height:9px;border-radius:999px;background:var(--text)}
+.h-rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 20px 8px}
+.h-rail > *{scroll-snap-align:start;flex:none}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font-family: var(--font-body)">
+
+<div style="background: {{annBg}}; color: {{annFg}}; text-align: center; padding: 9px 20px; font-size: 13px; font-weight: 500">Caja 100% neutra · envío discreto a todo el país</div>
+
+<header style="display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 4px; min-height: 60px; padding-inline: 20px 8px; background: var(--bg)">
+<a href="Tienda-Home.dc.html" class="t-link" style="font-family: var(--font-display); font-size: 19px; letter-spacing: 0.28em; text-transform: uppercase">{{brand}}</a>
+<span></span>
+<button type="button" role="switch" aria-checked="{{ariaChecked}}" aria-label="Modo discreto" onClick="{{toggle}}" class="m-icon-btn">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="{{eyeSlash}}"/></svg>
+</button>
+<a href="Tienda-Carrito.dc.html" class="m-icon-btn" aria-label="Carrito, 2 productos">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+<span style="position: absolute; top: 5px; right: 3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #5C1A2C; color: #F7EFE6; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">2</span>
+</a>
+</header>
+
+<main style="flex: 1">
+
+<section class="t-dark" style="position: relative; overflow: hidden; min-height: 640px; background: radial-gradient(ellipse at 85% 25%, #5C1A2C 0%, transparent 60%), radial-gradient(ellipse at 10% 100%, #3A2A1E 0%, transparent 55%), #1D1311; color: var(--text)">
+<svg viewBox="0 0 390 640" aria-hidden="true" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%">
+<defs>
+<linearGradient id="rb1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E3A98A"/><stop offset="1" stop-color="#8C2F3C"/></linearGradient>
+<linearGradient id="rb2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#5C1A2C"/><stop offset="1" stop-color="#E3A98A"/></linearGradient>
+</defs>
+<path d="M-30 400 C 90 250, 190 560, 430 330" fill="none" stroke="url(#rb1)" stroke-width="34" stroke-linecap="round" opacity="0.95"/>
+<path d="M-30 470 C 110 340, 250 620, 430 440" fill="none" stroke="url(#rb2)" stroke-width="18" stroke-linecap="round" opacity="0.9"/>
+<path d="M-30 330 C 120 200, 220 470, 430 250" fill="none" stroke="#F3EBE0" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+<g transform="translate(206 70) scale(1.6)" opacity="0.9"><g transform="translate(4 -16)"><g transform="translate(-2 -4)"><path d="M2 50L50 22L54 42L46 58L50 78Z M16 50L29 43L40 50L29 57Z" fill="#E3A98A" fill-rule="evenodd"/></g><g transform="translate(2 4)"><path d="M50 22L98 50L50 78L46 58L54 42Z M60 50L71 43L84 50L71 57Z" fill="#8C2F3C" fill-rule="evenodd"/></g></g></g>
+</svg>
+<div class="m-wrap" style="position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 18px; min-height: 640px; padding-block: 32px 36px">
+<span class="m-pill" style="align-self: flex-start; min-height: 34px; padding: 0 14px; font-size: 13px; background: rgba(243,235,224,0.16); color: #F3EBE0">sex shop online · envíos discretos</span>
+<h1 class="m-hero" style="color: #F3EBE0">tu intimidad,<br>en privado.</h1>
+<p style="margin: 0; max-width: 30ch; font-size: 16px; line-height: 1.45; color: #F3EBE0">Bienestar íntimo para vos o en compañía. Elegí con calma y recibilo sin que nadie lo note.</p>
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<a href="Tienda-Catalogo.dc.html" class="m-pill" style="background: #F3EBE0; color: #1D1311">ver catálogo</a>
+<a href="#discrecion" class="m-pill m-pill-ghost" style="color: #F3EBE0">cómo te cuidamos</a>
+</div>
+</div>
+</section>
+
+<div aria-hidden="true" style="overflow: hidden; padding-block: 16px; background: #E3A98A; color: #1D1311; font: 500 22px var(--font-body); letter-spacing: -0.02em; white-space: nowrap">
+<div class="m-ticker">
+<span>• caja neutra &nbsp; • envío discreto &nbsp; • 10% off con transferencia &nbsp; • solo TESERA en tu resumen &nbsp; </span>
+<span>• caja neutra &nbsp; • envío discreto &nbsp; • 10% off con transferencia &nbsp; • solo TESERA en tu resumen &nbsp; </span>
+<span>• caja neutra &nbsp; • envío discreto &nbsp; • 10% off con transferencia &nbsp; • solo TESERA en tu resumen &nbsp; </span>
+<span>• caja neutra &nbsp; • envío discreto &nbsp; • 10% off con transferencia &nbsp; • solo TESERA en tu resumen &nbsp; </span>
+</div>
+</div>
+
+<sc-if value="{{noZone}}" hint-placeholder-val="{{ false }}">
+<section aria-label="Elegí tu zona" class="m-wrap" style="padding-block: 24px 0">
+<div class="m-box" style="display: flex; flex-direction: column; gap: 12px">
+<h2 class="m-h3">¿Estás en Mar del Plata?</h2>
+<p class="m-p">Ingresá tu CP y recibí hoy. Te mostramos entrega y envío según tu zona.</p>
+<div style="display: flex; gap: 8px">
+<label for="cp" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Código postal</label>
+<input id="cp" class="t-input" inputmode="numeric" placeholder="Tu CP, por ej. 7600" style="flex: 1; background: var(--bg)">
+<button type="button" class="m-pill" onClick="{{pickMdp}}">ver</button>
+</div>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{hasZone}}" hint-placeholder-val="{{ true }}">
+<section class="m-wrap" style="padding-block: 20px 0">
+<button type="button" onClick="{{cycleZone}}" aria-label="Cambiar zona de entrega" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 0 18px; background: var(--surface); border: 0; border-radius: 999px; color: var(--text); font: 500 14px var(--font-body); cursor: pointer; text-align: left">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+<span style="flex: 1">Entrega en {{zoneName}}</span>
+<span style="text-decoration: underline">cambiar</span>
+</button>
+</section>
+</sc-if>
+
+<section aria-labelledby="h-top" style="padding-block: 40px 8px">
+<div class="m-wrap" style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px">
+<h2 id="h-top" class="m-h2">lo más elegido</h2>
+<div role="group" aria-label="Categorías" style="display: flex; gap: 22px; overflow-x: auto; margin-inline: -20px; padding-inline: 20px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<button type="button" class="h-tab" aria-pressed="{{t.pressed}}" onClick="{{t.pick}}" style="color: {{t.color}}"><span class="h-dot" style="display: {{t.dot}}"></span>{{t.label}}</button>
+</sc-for>
+</div>
+<p class="m-p">{{shipLine}}</p>
+</div>
+<div class="h-rail">
+<sc-for list="{{products}}" as="p" hint-placeholder-count="4">
+<a href="Tienda-Ficha.dc.html" style="display: flex; flex-direction: column; gap: 12px; width: 276px; color: var(--text); text-decoration: none; opacity: {{p.op}}">
+<div class="{{p.shape}}" style="display: block">
+<div class="m-ph" style="aspect-ratio: 4 / 5">
+<div class="m-ph-in"></div>
+<span class="{{p.badgeCls}}" style="position: absolute; top: 12px; left: 12px">{{p.badge}}</span>
+<span class="m-quick">{{p.quick}}</span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center">
+<span style="font-size: 17px; font-weight: 500">{{p.name}}</span>
+<span style="font-size: 14px; color: var(--text-2)">{{p.desc}}</span>
+<sc-if value="{{p.hasPrice}}" hint-placeholder-val="{{ true }}">
+<span style="font-size: 17px; font-weight: 600">{{p.transf}} <span style="font-size: 13px; font-weight: 500; color: var(--text-2)">con transferencia</span></span>
+<span class="pr-lista">{{p.lista}} con Mercado Pago o tarjeta</span>
+</sc-if>
+</div>
+</a>
+</sc-for>
+</div>
+<div class="m-wrap" style="padding-top: 24px"><a href="Tienda-Catalogo.dc.html" class="m-pill m-pill-ghost m-btn-full">ver todo el catálogo</a></div>
+</section>
+
+<section aria-labelledby="h-cat" class="m-wrap" style="padding-block: 40px 8px">
+<h2 id="h-cat" class="m-h2" style="margin-bottom: 20px">elegí por categoría</h2>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{cats}}" as="c" hint-placeholder-count="6">
+<a href="Tienda-Catalogo.dc.html" class="{{c.shape}}" style="display: block; color: #F7EFE6; text-decoration: none">
+<div class="m-ph" style="aspect-ratio: 4 / 5">
+<div class="m-ph-in"></div>
+<div style="position: absolute; inset: auto 0 0 0; padding: 40px 14px 14px; background: linear-gradient(transparent, rgba(20,10,8,0.78)); display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 20px; font-weight: 500; letter-spacing: -0.02em; text-transform: lowercase">{{c.name}}</span>
+<span style="font-size: 12px; opacity: 0.9">{{c.note}}</span>
+</div>
+</div>
+</a>
+</sc-for>
+</div>
+</section>
+
+<section class="t-dark" aria-label="Envío gratis" style="margin-top: 40px; background: #1D1311; color: var(--text)">
+<div class="m-wrap" style="padding-block: 40px; display: flex; flex-direction: column; gap: 14px">
+<p class="m-eyebrow" style="color: var(--text)">{{shipEyebrow}}</p>
+<h2 class="m-h2" style="font-size: 40px; color: var(--text)">{{shipTitle}}</h2>
+<p style="margin: 0; max-width: 34ch; font-size: 16px; line-height: 1.5; color: var(--text-2)">{{shipText}}</p>
+</div>
+</section>
+
+<section id="discrecion" aria-labelledby="h-disc" class="sh-glow" style="position: relative">
+<div class="m-wrap" style="padding-block: 56px 48px; display: flex; flex-direction: column; gap: 22px; color: #F7EFE6">
+<p class="m-eyebrow" style="color: #F7EFE6">tu privacidad</p>
+<h2 id="h-disc" class="m-hero" style="font-size: 44px; color: #F7EFE6">nadie sabe<br>qué compraste.</h2>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{disc}}" as="d" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 16px 18px; background: rgba(20,10,8,0.5); border-radius: 18px">
+<h3 class="m-h3" style="color: #F7EFE6">{{d.title}}</h3>
+<p style="margin: 0; font-size: 14px; line-height: 1.45; color: #E7D9CB">{{d.text}}</p>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+</main>
+
+<footer class="t-dark" style="background: #1D1311; color: var(--text)">
+<div class="m-wrap" style="padding-block: 40px 28px; display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 class="m-h3" style="font-size: 22px; color: var(--text)">buenos mails.</h2>
+<p style="margin: 0; font-size: 14px; color: var(--text-2)">Dejá tu email y te avisamos de lo nuevo. Nada más.</p>
+<div style="display: flex; align-items: center; border-bottom: 1px solid var(--text-2)">
+<label for="f-mail" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Tu email</label>
+<input id="f-mail" type="email" placeholder="tu email" style="flex: 1; min-width: 0; min-height: 48px; padding: 0; background: transparent; border: 0; color: var(--text); font: 400 16px var(--font-body)">
+<button type="button" style="min-height: 44px; padding: 0; background: none; border: 0; color: var(--text); font: 600 15px var(--font-body); cursor: pointer">suscribirme</button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; font-size: 14px">
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="color: var(--text-2); margin-bottom: 4px">ayuda</span>
+<a href="Tienda-Seguimiento.dc.html" class="t-link" style="color: var(--text); min-height: 36px; display: inline-flex; align-items: center">Seguí tu pedido</a>
+<a href="Tienda-Home.dc.html" class="t-link" style="color: var(--text); min-height: 36px; display: inline-flex; align-items: center">Preguntas frecuentes</a>
+<a href="Tienda-Home.dc.html" class="t-link" style="color: var(--text); min-height: 36px; display: inline-flex; align-items: center">Contacto</a></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="color: var(--text-2); margin-bottom: 4px">tienda</span>
+<a href="Tienda-Catalogo.dc.html" class="t-link" style="color: var(--text); min-height: 36px; display: inline-flex; align-items: center">Catálogo</a>
+<a href="Tienda-Home.dc.html" class="t-link" style="color: var(--text); min-height: 36px; display: inline-flex; align-items: center">Envíos</a>
+<a href="Tienda-Home.dc.html" class="t-link" style="color: var(--text); min-height: 36px; display: inline-flex; align-items: center">Términos y privacidad</a></div>
+</div>
+<div aria-hidden="true" style="overflow: hidden; white-space: nowrap; font-family: var(--font-display); font-size: 64px; line-height: 1; letter-spacing: 0.2em; text-transform: uppercase; color: #3A2926">{{brand}}</div>
+<p style="margin: 0; font-size: 12px; color: var(--text-2)">© 2026 Tésera · Sitio para mayores de 18 años · Argentina</p>
+</div>
+</footer>
+
+<sc-if value="{{isDiscreto}}" hint-placeholder-val="{{ false }}">
+<button type="button" style="position: sticky; bottom: 16px; align-self: flex-end; margin: 0 16px 16px 0; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; background: var(--primary-bg); color: var(--primary-fg); border: 0; border-radius: 999px; font: 600 14px var(--font-body); cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+Salir ya
+</button>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"claro","options":["claro","discreto"],"section":"Modo"},"zone":{"editor":"enum","default":"mdp","options":["none","mdp","amba","interior"],"section":"Zona"},"$preview":{"width":390,"height":3300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const d = s.discreto !== undefined ? s.discreto : this.props.theme === 'discreto';
+    const zone = s.zone || this.props.zone || 'mdp';
+    const tab = s.tab || 'top';
+    const money = (n) => '$ ' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const order = ['none', 'mdp', 'amba', 'interior'];
+    const zoneNames = { mdp: 'Mar del Plata · CP 7600', amba: 'CABA · CP 1425', interior: 'el Interior · CP 5000' };
+
+    // [nombre, descripción, categoría, precio de lista, consumible, stock local, forma, destacado]
+    const items = [
+      ['Succionador Brasa', 'Recargable y silencioso', 'succ', 54900, false, true, 'sh-x', true],
+      ['Vibrador Nocturno', 'Silicona suave, 3 velocidades', 'vib', 42500, false, false, 'sh-x', true],
+      ['Gel base agua', 'Lubricante con aloe, 100 ml', 'lub', 11900, true, true, 'sh-bottle', true],
+      ['Kit Primeros pasos', 'Todo en una caja neutra', 'kit', 49900, false, true, 'sh-kit', true],
+      ['Aceite de masaje', 'Tibio, notas de ámbar', 'lub', 18900, true, true, 'sh-jar', false],
+      ['Conjunto de encaje', 'Cómodo y lindo', 'lenc', 29900, false, false, 'sh-lace', false]
+    ];
+    const avail = (it) => {
+      if (zone === 'mdp') return it[5] ? ['b b-hoy', 'Hoy en Mar del Plata', true] : ['b b-enc', 'Llega en 5 a 10 días', true];
+      if (zone === 'none') return ['b b-env', 'Elegí tu zona', true];
+      if (it[4]) return ['b b-no', 'No disponible en tu zona', false];
+      return zone === 'amba' ? ['b b-env', 'Envío 24–48 h', true] : ['b b-env', 'Envío 3 a 6 días', true];
+    };
+    const shown = items.filter((it) => (tab === 'top' ? it[7] : it[2] === tab));
+    const products = shown.map((it) => {
+      const a = avail(it);
+      return {
+        name: it[0], desc: it[1], shape: it[6], badgeCls: a[0], badge: a[1], hasPrice: a[2], op: a[2] ? '1' : '0.7',
+        quick: 'ver opciones', lista: money(it[3]), transf: money(Math.round(it[3] * 0.9))
+      };
+    });
+    const tabDefs = [['top', 'más elegidos'], ['succ', 'succionadores'], ['vib', 'vibradores'], ['lub', 'lubricantes'], ['kit', 'kits']];
+    const tabs = tabDefs.map((t) => ({
+      label: t[1], pressed: tab === t[0] ? 'true' : 'false', color: tab === t[0] ? 'var(--text)' : 'var(--text-2)',
+      dot: tab === t[0] ? 'inline-block' : 'none', pick: () => this.setState({ tab: t[0] })
+    }));
+
+    const lubNote = zone === 'mdp' || zone === 'none' ? 'solo Mar del Plata' : 'no disponible en tu zona';
+    const cats = [
+      ['succionadores', 'estimulación suave', 'sh-glow'], ['vibradores', 'para vos o en compañía', 'sh-night'],
+      ['anal', 'para empezar con calma', 'sh-skin'], ['lubricantes', lubNote, 'sh-bottle'],
+      ['lencería', 'cómoda y linda', 'sh-lace'], ['kits', 'todo en una caja', 'sh-kit']
+    ].map((c) => ({ name: c[0], note: c[1], shape: c[2] }));
+
+    const ship = {
+      none: ['envíos', 'envío gratis según tu zona', 'Ingresá tu CP y te mostramos desde qué monto no pagás envío.'],
+      mdp: ['mar del plata', 'gratis desde $ 15.000', 'Con productos en stock local, lo recibís hoy con cadete.'],
+      amba: ['caba y gba', 'gratis desde $ 30.000', 'En CABA a domicilio. En GBA, gratis desde $ 40.000. Llega en 24 a 48 h.'],
+      interior: ['todo el país', 'envíos a todo el país', 'Pagás el costo cotizado al comprar. Llega en 3 a 6 días, en caja neutra.']
+    }[zone];
+    const shipLine = zone === 'none' ? 'Elegí tu zona para ver disponibilidad y envío.' : 'Precio con transferencia: 10% off.';
+
+    return {
+      theme: d ? 'discreto' : 'claro', isDiscreto: d,
+      brand: d ? 'Tienda' : 'Tésera',
+      annBg: d ? '#2A2A2A' : '#5C1A2C', annFg: d ? '#EDEDED' : '#F7EFE6',
+      ariaChecked: d ? 'true' : 'false',
+      eyeSlash: d ? 'M3 3l18 18' : 'M0 0',
+      toggle: () => this.setState({ discreto: !d }),
+      noZone: zone === 'none', hasZone: zone !== 'none', zoneName: zoneNames[zone] || '',
+      cycleZone: () => this.setState({ zone: order[(order.indexOf(zone) + 1) % order.length] }),
+      pickMdp: () => this.setState({ zone: 'mdp' }),
+      tabs, products, cats, shipLine,
+      shipEyebrow: ship[0], shipTitle: ship[1], shipText: ship[2],
+      disc: [
+        { title: 'Caja 100% neutra', text: 'Sin logos ni descripción del contenido.' },
+        { title: 'En tu resumen figura TESERA', text: 'Así aparece el cargo en tu tarjeta o banco.' },
+        { title: 'Modo discreto', text: 'Con un toque, la tienda se ve oscura y neutra, con fotos difuminadas.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+body {
+  font-family: system-ui, sans-serif;
+}

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<title>Tésera · Panel interno</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/954355a75b613403837594d1b08fa551">
+<link rel="stylesheet" href="./tienda.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&amp;family=Marcellus&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.p-chip{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;background:transparent;color:var(--text);border:1px solid var(--border);font:500 14px var(--font-body);cursor:pointer;white-space:nowrap}
+.p-chip[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+</style>
+</helmet>
+<div data-theme="claro" style="min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font-family: var(--font-body)">
+
+<header style="display: flex; align-items: center; justify-content: space-between; min-height: 60px; padding-inline: 20px; background: var(--text); color: var(--bg)">
+<span style="font-family: var(--font-display); font-size: 17px; letter-spacing: 0.3em; text-transform: uppercase">Tésera</span>
+<span style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase">Panel · Eric</span>
+</header>
+
+<main style="flex: 1; padding: 24px 20px 32px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 4px"><p class="m-eyebrow">{{eyebrow}}</p><h1 class="m-h2" style="font-size: 30px">{{title}}</h1></div>
+
+<sc-if value="{{isHoy}}" hint-placeholder-val="{{ true }}">
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
+<sc-for list="{{kpis}}" as="k" hint-placeholder-count="3"><div class="p-card" style="padding: 12px; gap: 6px"><span class="p-num">{{k.n}}</span><span style="font-size: 12px; color: var(--text-2); line-height: 1.3">{{k.l}}</span></div></sc-for>
+</div>
+<h2 class="m-h3">Para entregar en Mar del Plata</h2>
+<sc-for list="{{entregas}}" as="e" hint-placeholder-count="2">
+<div class="p-card">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span style="font-weight: 600">{{e.id}}</span><span class="b b-hoy">Hoy</span></div>
+<span style="font-size: 15px">{{e.items}}</span>
+<span class="m-p" style="font-size: 14px">{{e.addr}} · {{e.when}}</span>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px"><button type="button" class="p-btn-sec">Coordinar cadete</button><button type="button" class="p-btn">Marcar entregado</button></div>
+</div>
+</sc-for>
+<h2 class="m-h3">Transferencias a verificar</h2>
+<sc-for list="{{transf}}" as="t" hint-placeholder-count="2">
+<div class="p-card">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span style="font-weight: 600">{{t.id}}</span><span style="font-weight: 600">{{t.amount}}</span></div>
+<span class="b b-enc" style="align-self: flex-start">{{t.left}}</span>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px"><button type="button" class="p-btn-sec">Ver comprobante</button><button type="button" class="p-btn">Marcar pagado</button></div>
+</div>
+</sc-for>
+<h2 class="m-h3">Stock bajo</h2>
+<sc-for list="{{low}}" as="l" hint-placeholder-count="3">
+<div class="p-card" style="flex-direction: row; align-items: center; justify-content: space-between">
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><span style="font-weight: 600; font-size: 15px">{{l.name}}</span><span class="b b-no" style="align-self: flex-start">{{l.q}}</span></div>
+<button type="button" class="p-btn-sec" style="min-height: 44px; padding: 0 14px">Al pedido</button>
+</div>
+</sc-for>
+</sc-if>
+
+<sc-if value="{{isStock}}" hint-placeholder-val="{{ false }}">
+<label for="bus" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Buscar producto</label>
+<input id="bus" class="t-input" placeholder="Buscar producto">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px"><button type="button" class="p-btn">Cargar compra</button><button type="button" class="p-btn-sec">Guardar conteo</button></div>
+<sc-for list="{{stock}}" as="s" hint-placeholder-count="6">
+<div class="p-card" style="flex-direction: row; align-items: center; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0"><span style="font-weight: 600; font-size: 15px">{{s.name}}</span><span class="{{s.cls}}" style="align-self: flex-start">{{s.status}}</span></div>
+<div class="p-stepper" role="group" aria-label="{{s.aria}}"><button type="button" aria-label="Restar uno" onClick="{{s.minus}}">−</button><span>{{s.q}}</span><button type="button" aria-label="Sumar uno" onClick="{{s.plus}}">+</button></div>
+</div>
+</sc-for>
+</sc-if>
+
+<sc-if value="{{isSemanal}}" hint-placeholder-val="{{ false }}">
+<div class="p-card"><div class="m-row"><span class="m-row-k">Proveedor</span><span style="font-weight: 600">Sex Shop Mayorista</span></div><div class="m-row"><span class="m-row-k">Cierre del pedido</span><span style="font-weight: 600">Jueves</span></div></div>
+<h2 class="m-h3">Encargos pendientes</h2>
+<sc-for list="{{enc}}" as="e" hint-placeholder-count="3">
+<div class="p-card" style="flex-direction: row; justify-content: space-between; align-items: center; gap: 12px"><div style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><span style="font-weight: 600; font-size: 15px">{{e.name}}</span><span class="m-p" style="font-size: 13px">Pedido {{e.id}}</span></div><span style="font-weight: 600">× {{e.q}}</span></div>
+</sc-for>
+<h2 class="m-h3">Stock bajo, para reponer</h2>
+<sc-for list="{{rep}}" as="e" hint-placeholder-count="2">
+<div class="p-card" style="flex-direction: row; justify-content: space-between; align-items: center; gap: 12px"><div style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><span style="font-weight: 600; font-size: 15px">{{e.name}}</span><span class="m-p" style="font-size: 13px">Quedan {{e.left}}</span></div><span style="font-weight: 600">× {{e.q}}</span></div>
+</sc-for>
+<div class="p-card" style="border-color: var(--text)"><div class="m-row" style="align-items: center"><span style="font-weight: 600">Total para pedir</span><span style="font-size: 24px; font-weight: 600">{{semTotal}}</span></div><span style="font-size: 12px; color: var(--text-2)">Costo mayorista, sin envío. El envío se reparte entre los productos al recibirlo.</span><button type="button" class="p-btn">Armar pedido a SM</button><button type="button" class="p-btn-sec">Copiar lista</button></div>
+</sc-if>
+
+<sc-if value="{{isPedidos}}" hint-placeholder-val="{{ false }}">
+<div role="group" aria-label="Canal" style="display: flex; gap: 8px; overflow-x: auto"><sc-for list="{{canales}}" as="c" hint-placeholder-count="3"><button type="button" class="p-chip" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.l}}</button></sc-for></div>
+<div role="group" aria-label="Estado" style="display: flex; gap: 8px; overflow-x: auto"><sc-for list="{{estados}}" as="c" hint-placeholder-count="4"><button type="button" class="p-chip" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}">{{c.l}}</button></sc-for></div>
+<sc-for list="{{pedidos}}" as="p" hint-placeholder-count="6">
+<div class="p-card" style="gap: 8px">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span style="font-weight: 600">{{p.id}}</span><span style="font-weight: 600">{{p.total}}</span></div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="b b-env">{{p.canal}}</span><span class="{{p.cls}}">{{p.estado}}</span></div>
+<span class="m-p" style="font-size: 13px">{{p.note}}</span>
+</div>
+</sc-for>
+</sc-if>
+
+<sc-if value="{{isLiq}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; justify-content: space-between"><button type="button" class="p-chip" aria-label="Mes anterior">←</button><span style="font-weight: 600">Noviembre 2026</span><button type="button" class="p-chip" aria-label="Mes siguiente">→</button></div>
+<div class="p-card"><div class="m-row"><span class="m-row-k">Ventas</span><span style="font-weight: 600">{{liq.ventas}}</span></div><div class="m-row"><span class="m-row-k">Costos (mercadería, envíos, comisiones)</span><span style="font-weight: 600">− {{liq.costos}}</span></div><hr class="m-div"><div class="m-row" style="align-items: center"><span style="font-weight: 600">Ganancia</span><span class="p-num">{{liq.gan}}</span></div></div>
+<h2 class="m-h3">Parte de cada socio</h2>
+<div class="p-card" style="border-color: var(--text)"><div class="m-row" style="align-items: center"><span style="font-weight: 600">Eric · 40%</span><span style="font-size: 24px; font-weight: 600">{{liq.eric}}</span></div></div>
+<div class="p-card"><div class="m-row" style="align-items: center"><span style="font-weight: 600">Socio · 60%</span><span style="font-size: 24px; font-weight: 600">{{liq.socio}}</span></div></div>
+<p style="margin: 0; font-size: 12px; color: var(--text-2)">Valores de ejemplo. Cuando se conecte la tienda, se calculan con las ventas reales.</p>
+<button type="button" class="p-btn-sec">Descargar detalle del mes</button>
+</sc-if>
+</main>
+
+<nav class="p-tabbar" aria-label="Secciones">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+<button type="button" class="{{t.cls}}" aria-current="{{t.current}}" onClick="{{t.pick}}"><span style="font-size: 16px; line-height: 1">{{t.icon}}</span><span>{{t.l}}</span></button>
+</sc-for>
+</nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","default":"hoy","options":["hoy","stock","semanal","pedidos","liquidacion"],"section":"Pantalla"},"$preview":{"width":390,"height":1700}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const view = s.view || this.props.view || 'hoy';
+    const money = (n) => '$ ' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const tabDefs = [['hoy', 'Hoy', '●'], ['stock', 'Stock', '▦'], ['semanal', 'Semanal', '▤'], ['pedidos', 'Pedidos', '≡'], ['liquidacion', 'Liquidación', '％']];
+    const tabs = tabDefs.map((t) => ({
+      l: t[1], icon: t[2], cls: view === t[0] ? 'p-tab on' : 'p-tab', current: view === t[0] ? 'page' : 'false',
+      pick: () => this.setState({ view: t[0] })
+    }));
+
+    // Stock local con conteo ajustable
+    const baseStock = [['Succionador Brasa recargable', 3], ['Vibrador de bala', 4], ['Plug anal de inicio', 1], ['Gel lubricante base agua 100 ml', 1], ['Aceite de masaje tibio', 6], ['Kit Primeros pasos', 0]];
+    const counts = s.counts || baseStock.map((b) => b[1]);
+    const stock = baseStock.map((b, i) => {
+      const q = counts[i];
+      const status = q === 0 ? 'Sin stock' : (q < 2 ? 'Stock bajo' : 'En stock');
+      const set = (v) => { const c = counts.slice(); c[i] = Math.max(0, v); this.setState({ counts: c }); };
+      return {
+        name: b[0], q, status, cls: q === 0 ? 'b b-no' : (q < 2 ? 'b b-enc' : 'b b-env'),
+        aria: 'Cantidad de ' + b[0], minus: () => set(q - 1), plus: () => set(q + 1)
+      };
+    });
+
+    const titles = { hoy: ['Martes 24 de noviembre', 'Hoy'], stock: ['Mar del Plata', 'Stock local'], semanal: ['Cierre el jueves', 'Pedido semanal'], pedidos: ['Todos los canales', 'Pedidos'], liquidacion: ['Resumen del mes', 'Liquidación mensual'] }[view];
+
+    const canal = s.canal || 'Todos';
+    const estado = s.estado || 'Todos';
+    const all = [
+      ['#1236', 'Web', 'Pendiente de pago', 51460, 'Transferencia · vence en 6 h'],
+      ['#1235', 'Mercado Libre', 'En preparación', 38900, 'Retira el cadete a la tarde'],
+      ['#1234', 'Web', 'Pagado', 56900, 'Dos tandas: hoy y por encargo'],
+      ['#1233', 'Web', 'Enviado', 67300, 'Correo · código cargado'],
+      ['#1232', 'Mercado Libre', 'Entregado', 24500, 'Entregado ayer'],
+      ['#1231', 'Web', 'Cancelado', 29900, 'Venció el pago']
+    ];
+    const clsBy = { 'Pendiente de pago': 'b b-enc', 'En preparación': 'b b-hoy', Pagado: 'b b-hoy', Enviado: 'b b-env', Entregado: 'b b-ok', Cancelado: 'b b-no' };
+    const pedidos = all.filter((p) => (canal === 'Todos' || p[1] === canal) && (estado === 'Todos' || p[2] === estado)).map((p) => ({
+      id: p[0], canal: p[1], estado: p[2], cls: clsBy[p[2]], total: money(p[3]), note: p[4]
+    }));
+    const chips = (list, cur, key) => list.map((l) => ({ l, pressed: cur === l ? 'true' : 'false', pick: () => this.setState({ [key]: l }) }));
+
+    return {
+      isHoy: view === 'hoy', isStock: view === 'stock', isSemanal: view === 'semanal', isPedidos: view === 'pedidos', isLiq: view === 'liquidacion',
+      eyebrow: titles[0], title: titles[1], tabs, stock,
+      kpis: [{ n: '2', l: 'para entregar' }, { n: '2', l: 'transferencias' }, { n: '3', l: 'stock bajo' }],
+      entregas: [
+        { id: '#1234 · Tanda 1', items: 'Gel lubricante × 1', addr: 'Güemes 2450, 3° B', when: 'a la tarde' },
+        { id: '#1235', items: 'Succionador Brasa × 1', addr: 'Colón 1820', when: 'después de las 18' }
+      ],
+      transf: [{ id: '#1236', amount: '$ 51.460', left: 'Vence en 6 h' }, { id: '#1237', amount: '$ 28.710', left: 'Vence en 21 h' }],
+      low: [{ name: 'Gel lubricante base agua 100 ml', q: 'Queda 1' }, { name: 'Plug anal de inicio', q: 'Queda 1' }, { name: 'Kit Primeros pasos', q: 'Sin stock' }],
+      enc: [{ name: 'Vibrador Nocturno de silicona', id: '#1234', q: 1 }, { name: 'Conjunto de encaje', id: '#1230', q: 1 }, { name: 'Succionador Mini', id: '#1228', q: 2 }],
+      rep: [{ name: 'Gel lubricante base agua 100 ml', left: 1, q: 6 }, { name: 'Kit Primeros pasos', left: 0, q: 3 }],
+      semTotal: money(312400),
+      canales: chips(['Todos', 'Web', 'Mercado Libre'], canal, 'canal'),
+      estados: chips(['Todos', 'Pendiente de pago', 'En preparación', 'Enviado'], estado, 'estado'),
+      pedidos,
+      liq: { ventas: money(1240000), costos: money(790000), gan: money(450000), eric: money(180000), socio: money(270000) }
+    };
+  }
+}
+</script>
+</body>
+</html>

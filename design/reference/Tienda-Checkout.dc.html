@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<title>Tésera · Checkout</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/954355a75b613403837594d1b08fa551">
+<link rel="stylesheet" href="./tienda.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&amp;family=Marcellus&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.c-label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500;color:var(--text)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); color: var(--text); font-family: var(--font-body)">
+
+<header style="display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; min-height: 64px; padding-inline: 20px; background: var(--bg); border-bottom: 1px solid var(--border)">
+<a href="Tienda-Home.dc.html" class="t-link" style="font-family: var(--font-display); font-size: 18px; letter-spacing: 0.3em; text-transform: uppercase">{{brand}}</a>
+<span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2)">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+Compra privada
+</span>
+</header>
+
+<main style="flex: 1">
+<div class="m-wrap" style="padding-block: 20px 8px; display: flex; flex-direction: column; gap: 16px">
+<ol class="m-steps" aria-label="Pasos" style="margin: 0; padding: 0; list-style: none">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="3">
+<li class="{{s.cls}}" aria-current="{{s.current}}"><span>{{s.n}}</span><span>{{s.label}}</span></li>
+</sc-for>
+</ol>
+</div>
+
+<sc-if value="{{isDatos}}" hint-placeholder-val="{{ true }}">
+<section aria-labelledby="h1" class="m-wrap" style="padding-block: 8px 24px; display: flex; flex-direction: column; gap: 16px">
+<h1 id="h1" class="m-h2">Tus datos</h1>
+<p class="m-p">Los usamos solo para entregarte el pedido.</p>
+<label class="c-label" for="nom">Nombre y apellido<input id="nom" class="t-input" autocomplete="name" placeholder="Como figura en tu DNI"></label>
+<label class="c-label" for="ema">Email<input id="ema" class="t-input" type="email" autocomplete="email" placeholder="tu@email.com"><span style="font-size: 12px; font-weight: 400; color: var(--text-2)">Te escribimos con asuntos neutros, sin nombres de producto.</span></label>
+<label class="c-label" for="tel">Teléfono<input id="tel" class="t-input" type="tel" autocomplete="tel" placeholder="Para coordinar la entrega"></label>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+<label class="c-label" for="cp2">Código postal<input id="cp2" class="t-input" inputmode="numeric" value="7600"></label>
+<label class="c-label" for="loc">Localidad<input id="loc" class="t-input" value="Mar del Plata"></label>
+</div>
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px">
+<label class="c-label" for="cal">Calle<input id="cal" class="t-input" autocomplete="address-line1"></label>
+<label class="c-label" for="num">Número<input id="num" class="t-input" inputmode="numeric"></label>
+</div>
+<label class="c-label" for="pis">Piso o depto (opcional)<input id="pis" class="t-input"></label>
+<label class="c-label" for="not">Indicaciones para el cadete (opcional)<input id="not" class="t-input" placeholder="Timbre, horario, quién recibe"></label>
+</section>
+</sc-if>
+
+<sc-if value="{{isEnvio}}" hint-placeholder-val="{{ false }}">
+<section aria-labelledby="h2" class="m-wrap" style="padding-block: 8px 24px; display: flex; flex-direction: column; gap: 14px">
+<h1 id="h2" class="m-h2">Envío</h1>
+<p class="m-p">Opciones reales para el CP 7600, con precio y plazo.</p>
+<div role="radiogroup" aria-label="Opciones de envío" style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{shipOpts}}" as="o" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{o.checked}}" class="{{o.cls}}" onClick="{{o.pick}}">
+<span class="m-radio"></span>
+<span style="display: flex; flex-direction: column; gap: 4px; flex: 1">
+<span style="display: flex; justify-content: space-between; gap: 12px"><span style="font-weight: 600">{{o.name}}</span><span style="font-weight: 600">{{o.price}}</span></span>
+<span style="font-size: 14px; color: var(--text-2)">{{o.when}}</span>
+</span>
+</button>
+</sc-for>
+</div>
+<div class="m-box" style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-weight: 600; font-size: 15px">Tu pedido sale en dos tandas</span>
+<span class="m-p" style="font-size: 14px">Una llega hoy y la otra en 5 a 10 días. Podés cambiarlo a «todo junto» desde el carrito.</span>
+</div>
+<div class="m-box" style="display: flex; gap: 12px; align-items: flex-start">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px; color: var(--accent)"><path d="m5 12 5 5 9-10"/></svg>
+<span style="font-size: 14px; line-height: 1.45">Caja 100% neutra, sin logos ni descripción del contenido.</span>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{isPago}}" hint-placeholder-val="{{ false }}">
+<section aria-labelledby="h3" class="m-wrap" style="padding-block: 8px 24px; display: flex; flex-direction: column; gap: 14px">
+<h1 id="h3" class="m-h2">Pago</h1>
+<div role="radiogroup" aria-label="Medio de pago" style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{payOpts}}" as="o" hint-placeholder-count="2">
+<button type="button" role="radio" aria-checked="{{o.checked}}" class="{{o.cls}}" onClick="{{o.pick}}">
+<span class="m-radio"></span>
+<span style="display: flex; flex-direction: column; gap: 6px; flex: 1">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><span style="font-weight: 600">{{o.name}}</span><span style="font-weight: 600">{{o.price}}</span></span>
+<span style="font-size: 14px; color: var(--text-2)">{{o.note}}</span>
+<sc-if value="{{o.off}}" hint-placeholder-val="{{ false }}"><span class="pr-off" style="align-self: flex-start">10% OFF</span></sc-if>
+</span>
+</button>
+</sc-for>
+</div>
+<div class="m-box" style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-weight: 600; font-size: 15px">Tu privacidad en el pago</span>
+<span style="font-size: 14px; line-height: 1.45; color: var(--text-2)">En tu resumen de tarjeta figura TESERA. Si pagás por transferencia, en el banco figura el titular de la cuenta, no el nombre de la tienda.</span>
+<span style="font-size: 14px; color: var(--text-2)">Nadie sabe qué compraste.</span>
+</div>
+</section>
+</sc-if>
+
+<section aria-labelledby="h-res" class="m-wrap" style="padding-block: 8px 28px">
+<div class="m-box" style="display: flex; flex-direction: column; gap: 10px">
+<h2 id="h-res" class="m-h3">Resumen</h2>
+<div class="m-row"><span class="m-row-k">Subtotal (lista)</span><span>$ 54.400</span></div>
+<div class="m-row"><span class="m-row-k">Envío</span><span>{{shipSel}}</span></div>
+<div class="m-row"><span class="m-row-k">Transferencia 10% OFF</span><span>{{discLine}}</span></div>
+<hr class="m-div">
+<div class="m-row" style="align-items: center"><span style="font-weight: 600">Total</span><span style="font-size: 22px; font-weight: 600">{{total}}</span></div>
+</div>
+</section>
+</main>
+
+<div style="position: sticky; bottom: 0; display: flex; gap: 10px; padding: 12px 20px; background: var(--bg); border-top: 1px solid var(--border)">
+<sc-if value="{{canBack}}" hint-placeholder-val="{{ false }}"><button type="button" class="t-btn-sec" onClick="{{back}}" style="min-height: 52px">Volver</button></sc-if>
+<sc-if value="{{notLast}}" hint-placeholder-val="{{ true }}"><button type="button" class="t-btn" onClick="{{next}}" style="flex: 1">{{cta}}</button></sc-if>
+<sc-if value="{{isLast}}" hint-placeholder-val="{{ false }}"><a href="{{confirmHref}}" class="t-btn" style="flex: 1; text-align: center">{{cta}}</a></sc-if>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"claro","options":["claro","discreto"],"section":"Modo"},"step":{"editor":"enum","default":"1","options":["1","2","3"],"section":"Paso"},"$preview":{"width":390,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const d = this.props.theme === 'discreto';
+    const step = s.step || Number(this.props.step || 1);
+    const ship = s.ship !== undefined ? s.ship : 0;
+    const pay = s.pay !== undefined ? s.pay : 1;
+    const money = (n) => '$ ' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const sub = 54400;
+    const shipOptions = [
+      { name: 'Cadete en Mar del Plata', price: 2500, when: 'Tanda Hoy: llega en el día. Gratis desde $ 15.000 de stock local.' },
+      { name: 'Envío a domicilio', price: 6200, when: 'Por Correo, 3 a 5 días hábiles.' },
+      { name: 'Sucursal de Correo', price: 4300, when: 'Retirás con tu DNI, 3 a 5 días hábiles.' }
+    ];
+    const sel = shipOptions[ship];
+    const isTransfer = pay === 1;
+    const disc = isTransfer ? Math.round(sub * 0.1) : 0;
+    const total = sub - disc + sel.price;
+    const shipOpts = shipOptions.map((o, i) => ({
+      name: o.name, price: money(o.price), when: o.when,
+      checked: ship === i ? 'true' : 'false', cls: ship === i ? 'm-opt on' : 'm-opt',
+      pick: () => this.setState({ ship: i })
+    }));
+    const payDefs = [
+      { name: 'Mercado Pago', price: money(sub + sel.price), note: 'Tarjeta de crédito o débito, en cuotas si aplica.', off: false },
+      { name: 'Transferencia', price: money(sub - Math.round(sub * 0.1) + sel.price), note: 'Tenés 24 h para pagar. Te mostramos los datos al confirmar.', off: true }
+    ];
+    const payOpts = payDefs.map((o, i) => ({
+      ...o, checked: pay === i ? 'true' : 'false', cls: pay === i ? 'm-opt on' : 'm-opt',
+      pick: () => this.setState({ pay: i })
+    }));
+    const labels = ['Datos', 'Envío', 'Pago'];
+    const steps = labels.map((l, i) => ({
+      n: (i + 1) + '. ' + l, label: i + 1 < step ? 'Listo' : (i + 1 === step ? 'Ahora' : 'Falta'),
+      cls: i + 1 <= step ? 'm-step on' : 'm-step', current: i + 1 === step ? 'step' : 'false'
+    }));
+    return {
+      theme: d ? 'discreto' : 'claro', brand: d ? 'Tienda' : 'Tésera',
+      steps, shipOpts, payOpts,
+      isDatos: step === 1, isEnvio: step === 2, isPago: step === 3,
+      shipSel: money(sel.price), discLine: step === 3 && isTransfer ? '− ' + money(disc) : (step === 3 ? 'No aplica' : 'En el paso de pago'),
+      total: money(total),
+      canBack: step > 1, notLast: step < 3, isLast: step === 3, confirmHref: isTransfer ? 'Tienda-Confirmacion.dc.html' : 'Tienda-Confirmacion-MP.dc.html',
+      back: () => this.setState({ step: step - 1 }),
+      next: () => step < 3 ? this.setState({ step: step + 1 }) : this.setState({ step: 3 }),
+      cta: step === 1 ? 'Continuar al envío' : (step === 2 ? 'Continuar al pago' : (isTransfer ? 'Confirmar y ver datos de transferencia' : 'Confirmar y pagar con Mercado Pago'))
+    };
+  }
+}
+</script>
+</body>
+</html>
