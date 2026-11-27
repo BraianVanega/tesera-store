@@ -36,11 +36,22 @@ Fuera de alcance de v1: facturación electrónica ARCA, verificación formal de 
 - **Aceptación:** sync llena `SupplierOffer`; cotización por CP devuelve opciones y detecta AMBA; pedido de prueba creado en SM dos veces → una sola orden. 🛑
 
 ## Fase 4 · Tienda (frontend)
-- [ ] Tokens, layout, header con chip de zona, modo discreto (cookie), footer.
-- [ ] Home (mobile + desktop con hero), Catálogo, Ficha, Carrito (barra de envío, tandas Hoy/Encargo).
-- [ ] Hero 3D desktop con guardas de capacidad.
-- [ ] SEO on-page básico y `noindex` en rutas sensibles.
+- [x] Tokens, layout, header con chip de zona, modo discreto (cookie), footer.
+- [x] Home (mobile + desktop con hero), Catálogo, Ficha, Carrito (barra de envío, tandas Hoy/Encargo).
+- [x] Hero 3D desktop con guardas de capacidad.
+- [x] SEO on-page básico y `noindex` en rutas sensibles.
 - **Aceptación:** pantallas fieles a `design/reference/`; Lighthouse mobile ≥ 90 en Performance/Accesibilidad en home y ficha; modo discreto completo; sin 3D en mobile ni en equipos débiles. 🛑
+- _Notas 26/11:_
+  - Rutas: `/`, `/sex-shop`, `/sex-shop/[categoria]`, `/producto/[slug]`, `/carrito` (noindex, título "Mi pedido"), `robots.txt`. Una sola forma para la ficha: `/producto/[slug]` (docs/09 pedía elegir una).
+  - Estado en cookies propias, no httpOnly (para que "Salir ya" las borre al instante): `tsr_zona` (`ZONA:CP`), `tsr_carrito` (ids y cantidades), `tsr_discreto`. Todo pasa por Zod (`src/lib/shop/session.ts`).
+  - Modo discreto sin parpadeo: script inline en `<head>` (`src/lib/discrete/guard.ts`) que aplica el tema, el título "Mi pedido" y el alt neutro de las fotos antes de pintar, y los mantiene en cada navegación. El layout no lee cookies, así que las páginas siguen prerenderizadas (PPR).
+  - Lógica de vista pura y testeada al 100 %: `shop/view.ts` (badges, filtros, textos de envío) y `shop/cart-view.ts` (tandas, no disponibles, barra, totales). La cobertura exige 100 % también en `src/lib/shop/`.
+  - Barra de envío gratis: en MdP con dos tandas mide **solo la tanda de hoy** (como en el diseño); con una tanda o "todo junto", todo el carrito. Regla en `freeShippingBase()` (dominio). ⏳ Brai confirma.
+  - El catálogo se cachea 1 min (`use cache`, tag `catalog`); el carrito lee stock fresco. Ninguna página consulta la base durante el build (el build de CI pasa sin base).
+  - Hero 3D: `three` por npm, cargado con `next/dynamic` solo en ≥ 1024 px con ≥ 4 núcleos y ≥ 4 GB; se quita sin WebGL, con renderer por software o con ≥ 20 frames lentos. Verificado con GPU real (Metal) y que no aparece en headless/software ni en modo discreto.
+  - e2e (`tests/e2e/tienda.spec.ts`, 16 casos mobile + desktop) contra dev y contra `next start`: CP, consumibles fuera de MdP, carrito, tandas y "todo junto", modo discreto (persistencia, título, "Salir ya"). Necesitan `pnpm db:seed`. Otro puerto: `E2E_PORT=3100 pnpm test:e2e`.
+  - ⏳ **Lighthouse no se midió** (falta correrlo; ver docs/11).
+  - Fuera de esta fase: el botón "Continuar con tus datos" queda deshabilitado hasta la Fase 5; los links de ayuda/legales del footer y el newsletter del diseño, Fase 8; "más elegidos" por ventas reales, Fase 6 (hoy son los últimos publicados).
 
 ## Fase 5 · Checkout y pagos
 - [ ] Checkout 3 pasos; segunda cotización con calle y número; guardado de `quoteId`.

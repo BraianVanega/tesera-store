@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ProductLike } from "./availability";
-import { isMixedCart, planCart } from "./cart";
+import { freeShippingBase, isMixedCart, planCart } from "./cart";
 
 const prod = (p: Partial<ProductLike> = {}): ProductLike => ({
   isConsumable: false,
@@ -178,4 +178,32 @@ it("rechaza cantidades inválidas", () => {
 
 it("carrito vacío no tiene tandas", () => {
   expect(planCart([], "MDP")).toEqual({ items: [], batches: [], unavailable: [] });
+});
+
+describe("base del envío gratis", () => {
+  const price = (id: string) => ({ a: 11_900, b: 42_500 })[id] ?? 0;
+  const lines = [
+    { productId: "a", quantity: 2, product: prod({ localQuantity: 5 }) },
+    { productId: "b", quantity: 1, product: prod() },
+  ];
+
+  it("MdP en dos tandas → mide solo lo que llega hoy", () => {
+    expect(freeShippingBase(planCart(lines, "MDP"), price)).toBe(23_800);
+  });
+
+  it("MdP todo junto → mide todo el carrito", () => {
+    expect(freeShippingBase(planCart(lines, "MDP", { deliverTogether: true }), price)).toBe(66_300);
+  });
+
+  it("AMBA → todo lo que sale por dropship; lo no disponible no cuenta", () => {
+    const amba = [
+      { productId: "b", quantity: 1, product: prod() },
+      { productId: "a", quantity: 1, product: prod({ isConsumable: true }) },
+    ];
+    expect(freeShippingBase(planCart(amba, "AMBA"), price)).toBe(42_500);
+  });
+
+  it("carrito vacío → 0", () => {
+    expect(freeShippingBase(planCart([], "MDP"), price)).toBe(0);
+  });
 });

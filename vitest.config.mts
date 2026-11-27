@@ -14,9 +14,9 @@ export default defineConfig({
     environment: "node",
     coverage: {
       provider: "v8",
-      include: ["src/lib/domain/**", "src/lib/orders/transitions.ts"],
+      include: ["src/lib/domain/**", "src/lib/orders/transitions.ts", "src/lib/shop/**"],
       thresholds: { lines: 100, branches: 100, functions: 100, statements: 100 },
-      exclude: ["**/*.test.ts"],
+      exclude: ["**/*.test.ts", "src/lib/shop/data.ts", "src/lib/shop/constants.ts"],
     },
   },
 });

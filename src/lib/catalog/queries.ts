@@ -77,3 +77,16 @@ export async function getPublishedBySlug(
   });
   return row ? toCatalogProduct(row) : null;
 }
+
+/** Productos publicados por id, SIN cache: el carrito necesita el stock fresco. */
+export async function listPublishedByIds(
+  db: PrismaClient,
+  ids: string[],
+): Promise<CatalogProduct[]> {
+  if (ids.length === 0) return [];
+  const rows = await db.product.findMany({
+    where: { id: { in: ids }, published: true },
+    include: catalogInclude,
+  });
+  return rows.map(toCatalogProduct);
+}

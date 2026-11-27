@@ -35,6 +35,10 @@
 - [ ] Confirmar: ¿email transaccional al cliente? (el panel de Eric es el único aviso interno; el cliente necesita al menos la confirmación y el link de seguimiento).
 - [ ] Qué ve Eric de costos y de la liquidación.
 - [ ] Proveedor del plan B de pagos (cripto u otro) cuando se decida.
+- [ ] **GBA sin cotización** (Fase 4): sin la cotización de SM (Fase 3) solo CABA se reconoce por CP; un CP de GBA cae en "Interior" (badge "Envío 3 a 6 días" y sin umbral de envío gratis). Se corrige cuando la zona salga de la cotización (`moova-flex`). ¿Alcanza mientras tanto o cargamos una lista de CP del conurbano?
+- [ ] **Envío gratis por tanda en MdP** (Fase 4): con carrito mixto, la barra mide solo lo que llega hoy (como en el diseño). Confirmar que la tanda de 5 a 10 días paga su envío aparte (o va gratis).
+- [ ] **"Salir ya"** lleva a `https://www.smn.gob.ar/` (`src/lib/shop/constants.ts`). Confirmar el sitio neutro. Borra carrito y zona; deja el modo discreto prendido.
+- [ ] **Lighthouse mobile ≥ 90** en home y ficha (aceptación de la Fase 4): no se pudo correr en esta sesión.
 - [ ] Diseño del blog (próximo paso de diseño) y decisión de bloquear o no bots de IA de entrenamiento.
 
 ## Riesgos

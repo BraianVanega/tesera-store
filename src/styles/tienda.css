@@ -1,0 +1,577 @@
+/* Tésera · componentes del diseño "vivo" (portados de design/reference/tienda.css).
+   Fotos a sangre, píldoras, sin cajas con borde, titulares grandes en minúscula.
+   El layout va con utilidades de Tailwind; acá viven solo las piezas con identidad propia. */
+
+/* ── Marca: wordmark Marcellus; en modo discreto se reemplaza por un título neutro ── */
+.brand {
+  font-family: var(--font-display);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+}
+.brand-neutral {
+  display: none;
+}
+[data-theme="discreto"] .brand-full {
+  display: none;
+}
+[data-theme="discreto"] .brand-neutral {
+  display: inline;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+/* Lo que no debe verse en modo discreto (hero 3D, cintas de color, etc.) */
+[data-theme="discreto"] .hide-discreto {
+  display: none !important;
+}
+.only-discreto {
+  display: none !important;
+}
+[data-theme="discreto"] .only-discreto {
+  display: inline-flex !important;
+}
+
+/* ── Tipografía ── */
+.m-hero {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 52px;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-transform: lowercase;
+}
+.m-h2 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-transform: lowercase;
+  color: var(--text);
+}
+.m-h3 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+.m-p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+.m-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.m-eyebrow::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: currentColor;
+}
+.t-link {
+  color: inherit;
+  text-decoration: none;
+}
+.t-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Botones ── */
+.m-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--primary-bg);
+  color: var(--primary-fg);
+  font: 600 15px var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 200ms var(--ease),
+    color 200ms var(--ease);
+}
+.m-pill:hover {
+  background: var(--primary-hover-bg);
+  color: var(--primary-hover-fg);
+}
+.m-pill-ghost,
+.m-pill-ghost:hover {
+  background: transparent;
+  color: var(--text);
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+.m-pill-ghost:hover {
+  color: var(--accent);
+}
+.m-pill[aria-disabled="true"],
+.m-pill:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.m-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+}
+.m-count {
+  position: absolute;
+  top: 5px;
+  right: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--vino);
+  color: #f7efe6;
+  font-size: 11px;
+  font-weight: 700;
+}
+[data-theme="discreto"] .m-count {
+  background: #ededed;
+  color: #121212;
+}
+
+/* Chips de filtro */
+.f-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: 500 14px var(--font-body);
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 200ms var(--ease);
+}
+.f-chip:hover {
+  border-color: var(--text);
+}
+.f-chip[aria-current="true"],
+.f-chip[aria-pressed="true"] {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+/* Tabs grandes de la home */
+.h-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  white-space: nowrap;
+  color: var(--text-2);
+  font: 500 20px var(--font-body);
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+.h-tab[aria-current="true"] {
+  color: var(--text);
+}
+.h-tab[aria-current="true"]::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--text);
+}
+@media (min-width: 1024px) {
+  .h-tab {
+    font-size: 24px;
+  }
+}
+
+/* ── Campos ── */
+.t-input {
+  min-height: 48px;
+  min-width: 0;
+  padding: 0 16px;
+  border: 1.5px solid transparent;
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: 400 16px var(--font-body);
+}
+.t-input::placeholder {
+  color: var(--text-2);
+}
+.t-input:focus-visible {
+  border-color: var(--focus);
+  outline: none;
+}
+
+/* ── Cajas ── */
+.m-box {
+  padding: 18px;
+  border-radius: 20px;
+  background: var(--surface);
+}
+.m-div {
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: var(--border);
+}
+.m-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  font-size: 15px;
+}
+.m-row-k {
+  color: var(--text-2);
+}
+
+/* ── Fotos: fondo gris cálido con el producto flotando (siluetas hasta tener fotos reales) ── */
+.m-ph {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  background-color: var(--surface);
+}
+.m-ph-in {
+  position: absolute;
+  inset: 0;
+  transition: filter 200ms var(--ease);
+}
+.m-ph-in::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 70%;
+  width: 36%;
+  height: 5%;
+  transform: translateX(-30%);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.22);
+  filter: blur(9px);
+}
+.m-ph-in::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 20%;
+  height: 54%;
+  transform: translate(-50%, -50%) rotate(14deg);
+  border-radius: 46% 46% 42% 42% / 20% 20% 16% 16%;
+  background: linear-gradient(100deg, #fbf8f2, #d5cdc0);
+  box-shadow: inset -6px -8px 14px rgba(0, 0, 0, 0.08);
+}
+.m-ph-img .m-ph-in::before,
+.m-ph-img .m-ph-in::after {
+  display: none;
+}
+.m-ph-in img {
+  object-fit: cover;
+}
+.sh-bottle .m-ph-in::after {
+  width: 27%;
+  height: 46%;
+  top: 50%;
+  border-radius: 14px;
+  transform: translate(-50%, -50%) rotate(0);
+  background:
+    linear-gradient(#17100e, #17100e) 50% 0 / 40% 11% no-repeat,
+    linear-gradient(100deg, #9a5a30, #3a1a0c);
+}
+.sh-jar .m-ph-in::after {
+  width: 38%;
+  height: 28%;
+  top: 52%;
+  border-radius: 12px;
+  transform: translate(-50%, -50%) rotate(0);
+  background:
+    linear-gradient(#17100e, #17100e) 0 0 / 100% 22% no-repeat,
+    linear-gradient(100deg, #9a5a30, #3a1a0c);
+}
+.sh-kit .m-ph-in::after {
+  width: 46%;
+  height: 34%;
+  top: 52%;
+  border-radius: 8px;
+  transform: translate(-50%, -50%) rotate(0);
+  background:
+    linear-gradient(#5c1a2c, #5c1a2c) 50% 0 / 11% 100% no-repeat,
+    linear-gradient(#5c1a2c, #5c1a2c) 0 50% / 100% 11% no-repeat,
+    linear-gradient(100deg, #f4ebdd, #d8c9b3);
+}
+.sh-lace .m-ph-in::after {
+  width: 42%;
+  height: 34%;
+  top: 50%;
+  border-radius: 30% 30% 50% 50%;
+  transform: translate(-50%, -50%) rotate(-6deg);
+  background: linear-gradient(120deg, #7a2236, #3e0f1d);
+}
+/* Fotos de ambiente (categorías) */
+.sh-skin .m-ph,
+.sh-skin.m-ph {
+  background:
+    radial-gradient(ellipse at 38% 28%, #edaa82 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 85%, #6e3420 0%, transparent 60%), #b5613d;
+}
+.sh-night .m-ph,
+.sh-night.m-ph {
+  background:
+    radial-gradient(ellipse at 70% 30%, #8c2f3c 0%, transparent 55%),
+    radial-gradient(ellipse at 20% 90%, #3b4a2e 0%, transparent 60%), #1f1210;
+}
+.sh-glow,
+.sh-glow .m-ph {
+  background:
+    radial-gradient(ellipse at 50% 60%, #e8a36f 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 20%, #5c1a2c 0%, transparent 60%), #2a1512;
+}
+.sh-skin .m-ph-in::before,
+.sh-skin .m-ph-in::after,
+.sh-night .m-ph-in::before,
+.sh-night .m-ph-in::after,
+.sh-glow .m-ph-in::before,
+.sh-glow .m-ph-in::after {
+  display: none;
+}
+[data-theme="discreto"] .m-ph,
+[data-theme="discreto"] .m-ph .m-ph,
+[data-theme="discreto"] .sh-glow,
+[data-theme="discreto"] .sh-glow .m-ph {
+  background: var(--surface);
+}
+[data-theme="discreto"] .m-ph-in {
+  filter: blur(12px);
+}
+[data-theme="discreto"] .m-ph:hover .m-ph-in,
+[data-theme="discreto"] a:focus-visible .m-ph-in {
+  filter: none;
+}
+.m-quick {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1b1512;
+  font: 500 14px var(--font-body);
+}
+@media (hover: hover) and (min-width: 1024px) {
+  .p-card .m-quick {
+    opacity: 0;
+    transition: opacity 200ms var(--ease);
+  }
+  .p-card:hover .m-quick,
+  .p-card:focus-visible .m-quick {
+    opacity: 1;
+  }
+}
+
+/* ── Badges ── */
+.b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 3px 10px;
+  border-radius: 7px;
+  font: 600 12px/1.2 var(--font-body);
+}
+.b-hoy {
+  background: #5c1a2c;
+  color: #f7efe6;
+}
+.b-plazo {
+  padding-left: 0;
+  color: var(--text-2);
+}
+.m-ph .b-plazo {
+  padding-left: 10px;
+  background: var(--bg);
+}
+.b-envio,
+.b-zona {
+  background: var(--surface);
+  color: var(--text);
+}
+.m-ph .b-envio,
+.m-ph .b-zona {
+  background: var(--bg);
+}
+.b-no {
+  border: 1px dashed var(--text-2);
+  color: var(--text-2);
+}
+.m-ph .b-no {
+  background: var(--bg);
+}
+[data-theme="discreto"] .b-hoy {
+  background: #ededed;
+  color: #121212;
+}
+
+/* ── Precios ── */
+.pr-lista {
+  font-size: 13px;
+  color: var(--text-2);
+}
+.pr-off {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 7px;
+  background: #5c1a2c;
+  color: #f7efe6;
+  font-size: 12px;
+  font-weight: 600;
+}
+[data-theme="discreto"] .pr-off {
+  background: #ededed;
+  color: #121212;
+}
+
+/* ── Cinta en movimiento ── */
+.m-ticker {
+  display: flex;
+  width: max-content;
+  animation: m-slide 26s linear infinite;
+}
+@keyframes m-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Barra de envío gratis ── */
+.m-bar {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--bg);
+}
+.m-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+/* ── Stepper ── */
+.p-stepper {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px var(--border);
+}
+.p-stepper button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--text);
+  font: 600 20px var(--font-body);
+  cursor: pointer;
+}
+.p-stepper button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.p-stepper output {
+  min-width: 28px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Hero 3D: el canvas ocupa la mitad derecha */
+.h3-cv {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 58%;
+}
+.h3-cv canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m-ticker {
+    animation: none;
+  }
+  .m-ph-in,
+  .m-pill,
+  .f-chip {
+    transition: none;
+  }
+}
+
+/* Hero: fondo oscuro con brillo vino (neutro en modo discreto) */
+.hero-bg {
+  background:
+    radial-gradient(ellipse at 85% 25%, #5c1a2c 0%, transparent 60%),
+    radial-gradient(ellipse at 10% 100%, #3a2a1e 0%, transparent 55%), #1d1311;
+}
+@media (min-width: 1024px) {
+  .hero-bg {
+    background:
+      radial-gradient(ellipse at 78% 35%, #5c1a2c 0%, transparent 58%),
+      radial-gradient(ellipse at 5% 100%, #3a2a1e 0%, transparent 50%), #1d1311;
+  }
+}
+[data-theme="discreto"] .hero-bg {
+  background: var(--bg);
+}
+.hero-chip {
+  background: rgba(243, 235, 224, 0.16);
+  color: var(--text);
+}
+.hero-chip:hover {
+  background: rgba(243, 235, 224, 0.24);
+  color: var(--text);
+}

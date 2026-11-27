@@ -100,3 +100,15 @@ export function isMixedCart(plan: CartPlan): boolean {
   const sources = new Set(plan.items.map((i) => i.source));
   return sources.has("LOCAL") && sources.has("ENCARGO");
 }
+
+/**
+ * Subtotal A LISTA sobre el que se mide el envío gratis (docs/02, Tienda-Carrito).
+ * Cada tanda es una entrega aparte: si el carrito de MdP va en dos tandas, la barra mide la de
+ * hoy (cadete en el día). Con una sola tanda (o "todo junto"), mide todo lo que se puede vender.
+ * Las unidades no disponibles en la zona no cuentan.
+ */
+export function freeShippingBase(plan: CartPlan, listPrice: (productId: string) => number): number {
+  const batch = plan.batches.length > 1 ? plan.batches.find((b) => b.key === "TODAY") : undefined;
+  const items = batch ? batch.items : plan.items;
+  return items.reduce((acc, i) => acc + listPrice(i.productId) * i.quantity, 0);
+}
