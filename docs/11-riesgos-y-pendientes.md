@@ -32,17 +32,21 @@
 - [ ] **`SM_API_KEY` en `.env.local`** para probar contra la API real (sync, stock y cotizaciones; nunca se crean pedidos de prueba).
 - [ ] Forma real de `GET /stock`: la doc no la muestra; se asumió `sku`/`stock`/`estado`.
 - [ ] Secrets del repo de GitHub `CRON_BASE_URL` y `CRON_SECRET` (el mismo de Vercel) para los crons frecuentes de SM. Alternativa: Vercel Pro y todo en `vercel.json`.
-- [ ] **Precio del cadete en MdP** por debajo de $ 15.000 (Fase 5), y si hay un cadete por tanda o uno solo.
-- [ ] **Número de WhatsApp** para el comprobante de transferencia (Fase 5, `WHATSAPP_NUMBER`).
-- [ ] **Credenciales de prueba de MP** (Fase 5). El MCP ayuda a integrar, pero la tienda llama a la API de MP con `MP_ACCESS_TOKEN`.
-- [ ] Nombre de fantasía definitivo para `statement_descriptor` y confirmar longitud permitida por MP.
+- [x] ~~**Precio del cadete en MdP**~~: $ 2.500 por tanda (26/11), `config.mdpCourierFee`.
+- [ ] **Número de WhatsApp** para el comprobante de transferencia (Fase 5, `WHATSAPP_NUMBER`). Sin él no se muestra el botón.
+- [ ] **Datos de la cuenta para transferir** (`TRANSFER_HOLDER`, `TRANSFER_CBU`, `TRANSFER_ALIAS`, solo en Vercel). Sin ellos la página del pedido dice "te pasamos los datos por WhatsApp".
+- [ ] **Credenciales de prueba de MP** y **`MP_WEBHOOK_SECRET`** (Fase 5). El MCP ayuda a integrar, pero la tienda llama a la API de MP con `MP_ACCESS_TOKEN`. Configurar la URL del webhook (`/api/webhooks/mercadopago`, evento "Pagos") en "Tus integraciones".
+- [ ] **Verificar la plantilla de la firma del webhook** con el simulador de MP (`src/lib/payments/webhook.ts`): se usó la de los SDK porque la doc pública no la muestra completa.
+- [ ] **`config.mpHoldHours`** (cuánto se reserva el stock mientras el cliente paga con MP): hoy **2 h**. ¿Va?
+- [ ] Nombre de fantasía definitivo para `statement_descriptor` (hoy `"TESERA"`) y confirmar longitud permitida por MP.
+- [ ] Página del pedido sin token: con PPR el 404 es "blando" (HTTP 200 + noindex + "no encontramos ese pedido"). No expone datos; si se quiere un 404 real, hay que sacar la página del prerender parcial.
 - [ ] Textos legales con un profesional (términos, privacidad, cambios, arrepentimiento).
 - [ ] Retención de datos (`PII_RETENTION_MONTHS`).
 - [ ] Confirmar: ¿email transaccional al cliente? (el panel de Eric es el único aviso interno; el cliente necesita al menos la confirmación y el link de seguimiento).
 - [ ] Qué ve Eric de costos y de la liquidación.
 - [ ] Proveedor del plan B de pagos (cripto u otro) cuando se decida.
 - [x] ~~**GBA sin cotización**~~: resuelto en la Fase 3; la zona sale de la cotización (`moova-flex`). Solo sin SM se vuelve a la detección por CP.
-- [ ] **Envío gratis por tanda en MdP** (Fase 4): con carrito mixto, la barra mide solo lo que llega hoy (como en el diseño). Confirmar que la tanda de 5 a 10 días paga su envío aparte (o va gratis).
+- [x] ~~**Envío gratis por tanda en MdP**~~: cada tanda paga su cadete salvo que llegue a $ 15.000 (26/11).
 - [ ] **"Salir ya"** lleva a `https://www.smn.gob.ar/` (`src/lib/shop/constants.ts`). Confirmar el sitio neutro. Borra carrito y zona; deja el modo discreto prendido.
 - [ ] **Lighthouse mobile ≥ 90** en home y ficha (aceptación de la Fase 4): no se pudo correr en esta sesión.
 - [ ] Diseño del blog (próximo paso de diseño) y decisión de bloquear o no bots de IA de entrenamiento.

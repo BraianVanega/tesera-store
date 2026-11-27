@@ -50,13 +50,31 @@ export interface PaymentProvider {
 - Unit: `verifySignature`, mapeo de estados MP → acción, idempotencia (mismo `payment.id` dos veces → un `markPaid`).
 - E2E: flujo completo en sandbox; webhook simulado con firma válida/ inválida.
 
+### Cómo quedó implementado (Fase 5)
+
+- **REST con `fetch` + Zod, sin SDK** (`src/lib/payments/mercadopago.ts`), mismo patrón que el cliente de SM. `MP_API_BASE_URL` solo existe para apuntar a un MP falso en el e2e.
+- **Preferencia**: un único ítem `"Pedido Tésera"` por el total (envío incluido), `external_reference = order.id`, `back_urls` → `/pedido/[code]?t=token`. **Sin datos del comprador** (ni email ni nombre).
+  - `expires` + `expiration_date_to` = `paymentDueAt` (hoy `config.mpHoldHours` = 2 h).
+  - `date_of_expiration` (tickets de efectivo) = `config.cashTicketDays` = 3 días, lo mínimo que recomienda MP.
+  - En local (`http://`) no se mandan `notification_url` ni `auto_return`: MP los rechaza sin HTTPS.
+- **Webhook** (`/api/webhooks/mercadopago`):
+  1. Valida la firma; si no valida, responde 401.
+  2. Consulta `GET /v1/payments/{id}`.
+  3. `mpPaymentAction` decide la acción (`src/lib/payments/mp-status.ts`). Un aprobado cuyo **monto o moneda** no coincide con el pedido **no se paga**: queda `needsAttention` para Eric.
+  4. Si algo falla, responde 500 y MP reintenta.
+  - Es idempotente por `(provider, externalId, status)` en `PaymentEvent`.
+- **Ticket de efectivo** (`pending` + `payment_type_id: "ticket"`): la reserva se extiende hasta el vencimiento del ticket + `config.cashHoldExtraHours`.
+- **Reembolso / contracargo** → `cancelOrder`: se devuelve el stock local con un movimiento `RETURN`. Si ya había encargo o despacho a SM, queda marcado para Eric.
+- **Reintentar**: desde `/pedido/[code]` con un pago rechazado o abandonado se crea una preferencia nueva para el mismo pedido.
+- ⚠️ **Plantilla de la firma**: la doc pública no la muestra entera. Se usó la de los SDK oficiales, `id:{data.id};request-id:{x-request-id};ts:{ts};`, con HMAC-SHA256 en hex. **Verificarla con el simulador de webhooks de MP** antes de producción (`// TODO(brai)` en `webhook.ts`).
+
 ## Transferencia
 
 Ver flujo completo en `03-modelo-datos.md`. Resumen técnico:
 
 - Datos de la cuenta (alias/CBU/titular) en `config`/env, **no** en el código del cliente (`TRANSFER_ALIAS`, `TRANSFER_CBU`, `TRANSFER_HOLDER`).
 - El monto exacto = `transferPrice(subtotal) + envío`. Mostrar y permitir copiar.
-- Comprobante → Vercel Blob (URL firmada, privado). Eric verifica en el panel.
+- Comprobante → Vercel Blob **privado** (`uploadPrivateProof`, foto o PDF ≤ 10 MB) o por WhatsApp (`wa.me/<WHATSAPP_NUMBER>` con solo el código del pedido, nunca productos). Hasta el panel (Fase 7) Eric confirma con `pnpm order:mark-paid TS-XXXXXX --by eric`, que usa el mismo `markPaid` que el webhook.
 - Opcional (más adelante): conciliación automática leyendo movimientos de MP si la transferencia llega a una cuenta de MP (CVU); no entra en v1.
 
 ## Plan B: cripto u otro procesador

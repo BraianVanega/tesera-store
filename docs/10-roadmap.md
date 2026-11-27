@@ -71,11 +71,18 @@ Fuera de alcance de v1: facturación electrónica ARCA, verificación formal de 
   - Fuera de esta fase: el botón "Continuar con tus datos" queda deshabilitado hasta la Fase 5; los links de ayuda/legales del footer y el newsletter del diseño, Fase 8; "más elegidos" por ventas reales, Fase 6 (hoy son los últimos publicados).
 
 ## Fase 5 · Checkout y pagos
-- _Definido por Brai (26/11):_ cadete en MdP gratis desde $ 15.000 (falta el precio por debajo); comprobante de transferencia **subido a Blob y por WhatsApp** (falta el número); MP se integra con ayuda del MCP oficial (`.mcp.json`).
-- [ ] Checkout 3 pasos; segunda cotización con calle y número; guardado de `quoteId`.
-- [ ] `PaymentProvider` + Mercado Pago Checkout Pro, preferencia, webhook verificado e idempotente, efectivo vía MP.
-- [ ] Transferencia: reserva, timer 24 h, comprobante a Blob, `expire-transfers`.
-- [ ] Confirmación (MP / Transferencia) y seguimiento.
+- _Definido por Brai (26/11):_
+  - Cadete en MdP: **$ 2.500 por tanda**, gratis cada tanda desde $ 15.000.
+  - Envío gratis en AMBA: **solo la opción más barata** queda en $ 0; las demás pagan la diferencia.
+  - Comprobante de transferencia: **subido a Blob y por WhatsApp**.
+  - MP se integra con ayuda del MCP oficial (`.mcp.json`).
+- [x] Checkout 3 pasos (`/checkout`); cotización de checkout con calle, número y sucursal; se guarda `quoteId`/`agencyId`. Todo se recalcula en el servidor (`createOrder`); la reserva de stock local es atómica (no sobrevende con dos compras simultáneas).
+- [x] `PaymentProvider` + Mercado Pago Checkout Pro (REST), preferencia neutra, webhook firmado, consulta del pago e idempotente, efectivo vía MP con reserva extendida, reembolso → cancelación.
+- [x] Transferencia: reserva 24 h, cuenta regresiva, datos copiables, comprobante a Blob privado o WhatsApp, vencimiento automático (cron `orders-maintenance`, cada hora desde GitHub Actions `cron.yml`) y `pnpm order:mark-paid`.
+- [x] Confirmación y seguimiento en `/pedido/[code]?t=token` (sin token, "no encontramos ese pedido"; noindex, título "Mi pedido").
+- [x] `markPaid` único: venta local + `StockMovement SALE`, encargos `PENDIENTE` y despacho a SM (si SM falla queda `PAID` y el cron reintenta). Adelanta parte de la Fase 6.
+- Verificado con unit (232 tests, 100 % de cobertura en dominio, tienda y estados de pago), integración contra Postgres y e2e con SM y MP **falsos** (transferencia en MdP, MP con webhook firmado, GBA con sucursal).
+- ⏳ Falta para la aceptación: **pago real en el sandbox de MP** (credenciales de prueba y `MP_WEBHOOK_SECRET`) y un despacho de prueba a SM. Se puede hacer con el MCP de MP.
 - **Aceptación:** pago de prueba en sandbox → `PAID`; webhook duplicado no duplica; transferencia vence y libera stock; pedido dropship de prueba despachado a SM. 🛑
 
 ## Fase 6 · Fulfillment y stock
