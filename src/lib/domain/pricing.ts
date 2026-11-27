@@ -69,22 +69,22 @@ export type OrderTotals = {
 };
 
 /**
- * Totales del pedido.
- * `quotedShipping`: costo del envío cotizado (SM o cadete). Si el pedido califica para envío gratis,
- * el cliente paga 0 y la tienda absorbe ese costo (va a Order.shippingCost, fuera de esta función).
+ * Totales del pedido. `shippingCharged` ya viene calculado (`domain/shipping.ts`): lo que paga el
+ * cliente por el envío. El 10 % OFF de transferencia se aplica solo a los productos, nunca al envío.
  */
 export function orderTotals(args: {
   lines: CartLine[];
-  zone: Zone;
-  cp: string;
   paymentMethod: "MP" | "TRANSFER";
-  quotedShipping: number;
+  shippingCharged: number;
 }): OrderTotals {
   const subtotal = listSubtotal(args.lines);
   const discount = args.paymentMethod === "TRANSFER" ? transferDiscount(subtotal) : 0;
-  const free = freeShippingStatus(subtotal, args.zone, args.cp).isFree;
-  const shippingCharged = free ? 0 : args.quotedShipping;
-  return { subtotal, discount, shippingCharged, total: subtotal - discount + shippingCharged };
+  return {
+    subtotal,
+    discount,
+    shippingCharged: args.shippingCharged,
+    total: subtotal - discount + args.shippingCharged,
+  };
 }
 
 /**

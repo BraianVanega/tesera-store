@@ -58,26 +58,19 @@ describe("pricing", () => {
     expect(s.isFree).toBe(false);
     expect(s.threshold).toBeNull();
   });
-  it("el descuento por transferencia no altera el umbral (lista)", () => {
-    // 16.000 de lista califica en MdP aunque con transferencia sean 14.400
+  it("transferencia: 10 % OFF solo sobre productos, el envío entero", () => {
     const t = orderTotals({
       lines: [{ unitPrice: 16_000, quantity: 1 }],
-      zone: "MDP",
-      cp: "7600",
       paymentMethod: "TRANSFER",
-      quotedShipping: 3_000,
+      shippingCharged: 2_500,
     });
-    expect(t.shippingCharged).toBe(0);
-    expect(t.discount).toBe(1_600);
-    expect(t.total).toBe(14_400);
+    expect(t).toEqual({ subtotal: 16_000, discount: 1_600, shippingCharged: 2_500, total: 16_900 });
   });
-  it("cobra el envío si no alcanza el umbral", () => {
+  it("MP cobra lista + envío", () => {
     const t = orderTotals({
       lines: [{ unitPrice: 5_000, quantity: 2 }],
-      zone: "AMBA",
-      cp: "1425",
       paymentMethod: "MP",
-      quotedShipping: 7_100,
+      shippingCharged: 7_100,
     });
     expect(t).toEqual({ subtotal: 10_000, discount: 0, shippingCharged: 7_100, total: 17_100 });
   });

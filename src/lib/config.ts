@@ -25,6 +25,31 @@ export const config = {
   /** Horas de reserva de una transferencia antes de cancelar el pedido. */
   transferHoldHours: 24,
 
+  /**
+   * Horas de reserva de un pedido con Mercado Pago mientras el cliente paga (si abandona, se libera).
+   * TODO(brai): confirmar (propuesta 2 h).
+   */
+  mpHoldHours: 2,
+
+  /**
+   * Efectivo vía MP (Rapipago / Pago Fácil): vencimiento del ticket (`date_of_expiration` de la
+   * preferencia; MP recomienda al menos 3 días) + 2 h hábiles de acreditación. Reserva = ticket + margen.
+   */
+  cashTicketDays: 3,
+  cashHoldExtraHours: 6,
+
+  /** Cadete en Mar del Plata, POR TANDA (gratis si la tanda llega a freeShipping.MDP). Brai, 26/11. */
+  mdpCourierFee: 2_500,
+
+  /** Mercado Pago Checkout Pro (docs/05). */
+  mp: {
+    apiBaseUrl: "https://api.mercadopago.com",
+    /** Ítem neutro de la preferencia: nunca nombres de producto. */
+    itemTitle: "Pedido Tésera",
+    /** Resumen de tarjeta. TODO(brai): nombre de fantasía definitivo y largo máximo que acepta MP. */
+    statementDescriptor: "TESERA",
+  },
+
   /** Stock local por debajo del cual el pedido semanal sugiere reponer. */
   lowStockThreshold: 2,
 
