@@ -12,11 +12,25 @@ export default defineConfig({
   test: {
     include: ["src/**/*.test.ts", "tests/unit/**/*.test.ts", "tests/integration/**/*.test.ts"],
     environment: "node",
+    // Los tests de integración comparten la base de pruebas: los archivos corren de a uno.
+    fileParallelism: false,
     coverage: {
       provider: "v8",
-      include: ["src/lib/domain/**", "src/lib/orders/transitions.ts", "src/lib/shop/**"],
+      include: [
+        "src/lib/domain/**",
+        "src/lib/orders/transitions.ts",
+        "src/lib/orders/code.ts",
+        "src/lib/shop/**",
+        "src/lib/payments/mp-status.ts",
+        "src/lib/payments/webhook.ts",
+      ],
       thresholds: { lines: 100, branches: 100, functions: 100, statements: 100 },
-      exclude: ["**/*.test.ts", "src/lib/shop/data.ts", "src/lib/shop/constants.ts"],
+      exclude: [
+        "**/*.test.ts",
+        "src/lib/shop/data.ts",
+        "src/lib/shop/checkout-server.ts",
+        "src/lib/shop/constants.ts",
+      ],
     },
   },
 });
