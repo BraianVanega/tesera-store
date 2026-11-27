@@ -9,8 +9,8 @@ import { CheckoutError, createOrder, type CreateOrderInput } from "../../src/lib
 import { expireOrders, retryDispatch } from "../../src/lib/orders/jobs";
 import { markPaid } from "../../src/lib/orders/mark-paid";
 import type { MpClient } from "../../src/lib/payments/mercadopago";
-import { mpPaymentSchema } from "../../src/lib/payments/mp-status";
-import { processMpPayment } from "../../src/lib/payments/process";
+import { mpOrderSchema } from "../../src/lib/payments/mp-status";
+import { processMpOrder } from "../../src/lib/payments/process";
 import { createPrisma } from "../../src/lib/prisma";
 import { COURIER_CODE } from "../../src/lib/shop/checkout";
 
@@ -281,8 +281,8 @@ describe.skipIf(!url)("pedidos y pagos (integración)", () => {
 
   // ── Webhook de MP ───────────────────────────────────
 
-  function fakeMp(payment: Record<string, unknown>): Pick<MpClient, "getPayment"> {
-    return { getPayment: vi.fn(async () => mpPaymentSchema.parse(payment)) };
+  function fakeMp(order: Record<string, unknown>): Pick<MpClient, "getOrder"> {
+    return { getOrder: vi.fn(async () => mpOrderSchema.parse(order)) };
   }
 
   it("webhook: aprobado paga una vez; duplicado no hace nada; reembolso cancela y devuelve stock", async () => {
@@ -290,20 +290,21 @@ describe.skipIf(!url)("pedidos y pagos (integración)", () => {
     const o = await createOrder(db, mdp([[gel.id, 1]], { method: "MP" }));
     const total = (await db.order.findUniqueOrThrow({ where: { id: o.id } })).total;
     const approved = {
-      id: 77,
-      status: "approved",
+      id: "ORD77",
+      status: "processed",
+      status_detail: "accredited",
       external_reference: o.id,
-      transaction_amount: total,
-      currency_id: "ARS",
+      total_paid_amount: `${total}.00`,
+      currency: "ARS",
     };
 
-    expect(await processMpPayment(db, fakeMp(approved), "77")).toEqual({ result: "paid" });
-    expect(await processMpPayment(db, fakeMp(approved), "77")).toEqual({ result: "duplicate" });
+    expect(await processMpOrder(db, fakeMp(approved), "ORD77")).toEqual({ result: "paid" });
+    expect(await processMpOrder(db, fakeMp(approved), "ORD77")).toEqual({ result: "duplicate" });
     expect(await level(gel.id)).toEqual({ quantity: 1, reserved: 0 });
 
-    const refunded = { ...approved, status: "refunded" };
-    expect(await processMpPayment(db, fakeMp(refunded), "77")).toEqual({ result: "cancelled" });
-    expect(await processMpPayment(db, fakeMp(refunded), "77")).toEqual({ result: "duplicate" });
+    const refunded = { ...approved, status: "refunded", status_detail: "refunded" };
+    expect(await processMpOrder(db, fakeMp(refunded), "ORD77")).toEqual({ result: "cancelled" });
+    expect(await processMpOrder(db, fakeMp(refunded), "ORD77")).toEqual({ result: "duplicate" });
     expect(await db.order.findUniqueOrThrow({ where: { id: o.id } })).toMatchObject({
       status: "CANCELLED",
     });
@@ -317,37 +318,48 @@ describe.skipIf(!url)("pedidos y pagos (integración)", () => {
     const { gel } = await seed();
     const o = await createOrder(db, mdp([[gel.id, 1]], { method: "MP" }));
     const before = (await db.order.findUniqueOrThrow({ where: { id: o.id } })).paymentDueAt!;
-    const base = { id: 1, external_reference: o.id, transaction_amount: 1, currency_id: "ARS" };
+    const base = {
+      id: "ORD1",
+      external_reference: o.id,
+      total_paid_amount: "1.00",
+      currency: "ARS",
+    };
+    const ticket = { payments: [{ payment_method: { type: "ticket" } }] };
 
     expect(
-      await processMpPayment(
+      await processMpOrder(
         db,
-        fakeMp({ ...base, status: "pending", payment_type_id: "ticket" }),
-        "1",
+        fakeMp({
+          ...base,
+          status: "action_required",
+          created_date: now.toISOString(),
+          transactions: ticket,
+        }),
+        "ORD1",
         { now },
       ),
     ).toEqual({ result: "waiting" });
     const after = (await db.order.findUniqueOrThrow({ where: { id: o.id } })).paymentDueAt!;
     expect(after.getTime()).toBeGreaterThan(before.getTime() + 48 * 3_600_000);
 
-    expect(await processMpPayment(db, fakeMp({ ...base, id: 2, status: "rejected" }), "2")).toEqual(
-      {
-        result: "ignored",
-      },
-    );
-    expect(await processMpPayment(db, fakeMp({ ...base, id: 3, status: "approved" }), "3")).toEqual(
-      {
-        result: "attention",
-      },
-    );
+    expect(
+      await processMpOrder(db, fakeMp({ ...base, id: "ORD2", status: "failed" }), "ORD2"),
+    ).toEqual({
+      result: "ignored",
+    });
+    expect(
+      await processMpOrder(db, fakeMp({ ...base, id: "ORD3", status: "processed" }), "ORD3"),
+    ).toEqual({
+      result: "attention",
+    });
     const row = await db.order.findUniqueOrThrow({ where: { id: o.id } });
     expect(row).toMatchObject({ status: "PENDING_PAYMENT", needsAttention: true });
     expect(row.attentionNote).toContain("monto pagado 1");
     expect(
-      await processMpPayment(
+      await processMpOrder(
         db,
-        fakeMp({ ...base, id: 4, external_reference: "otro", status: "approved" }),
-        "4",
+        fakeMp({ ...base, id: "ORD4", external_reference: "otro", status: "processed" }),
+        "ORD4",
       ),
     ).toEqual({
       result: "unknown-order",

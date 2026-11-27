@@ -1,14 +1,14 @@
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
-import { processMpPayment } from "@/lib/payments/process";
+import { processMpOrder } from "@/lib/payments/process";
 import { dispatchToSm, mpClient } from "@/lib/payments/server";
 import { verifyMpSignature } from "@/lib/payments/webhook";
 
 /**
  * Webhook de Mercado Pago (docs/05):
  * 1. Verifica la firma (`x-signature` + `x-request-id` + `data.id`). Sin firma válida → 401.
- * 2. Solo procesa `type=payment`; el resto se acepta y se ignora.
- * 3. Consulta el pago a la API y aplica (idempotente). Responde 200; si algo falla → 500 y MP
+ * 2. Solo procesa `type=order` (API de Orders); el resto se acepta y se ignora.
+ * 3. Consulta la order a la API y aplica (idempotente). Responde 200; si algo falla → 500 y MP
  *    reintenta (cada 15 min). Logs sin PII.
  */
 export async function POST(request: Request) {
@@ -44,10 +44,10 @@ export async function POST(request: Request) {
       .catch(() => {});
     return Response.json({ ok: false }, { status: 401 });
   }
-  if (type !== "payment" || !dataId) return Response.json({ ok: true, ignored: true });
+  if (type !== "order" || !dataId) return Response.json({ ok: true, ignored: true });
 
   try {
-    const r = await processMpPayment(db(), mpClient(), dataId, { dispatch: dispatchToSm });
+    const r = await processMpOrder(db(), mpClient(), dataId, { dispatch: dispatchToSm });
     return Response.json({ ok: true, ...r });
   } catch (e) {
     await db()

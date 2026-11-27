@@ -51,18 +51,23 @@ export function startFakes(appUrl: string): Promise<Server[]> {
     json(res, 404, { ok: false, error: "no" });
   });
 
-  const payments = new Map<string, Record<string, unknown>>();
-  const prefs = new Map<string, Record<string, unknown>>();
+  // API de Orders: POST /v1/orders → checkout_url; GET /v1/orders/{id}; webhook tópico `order`.
+  const orders = new Map<string, Record<string, unknown>>();
   let n = 0;
   const mp = createServer(async (req, res) => {
     const u = new URL(req.url!, "http://x");
     const body = await readBody(req);
-    if (req.method === "POST" && u.pathname === "/checkout/preferences") {
+    if (req.method === "POST" && u.pathname === "/v1/orders") {
       if (req.headers.authorization !== `Bearer ${FAKE.mpToken}`)
         return json(res, 401, { message: "token" });
-      const id = `pref_${++n}`;
-      prefs.set(id, JSON.parse(body));
-      return json(res, 201, { id, init_point: `http://127.0.0.1:${FAKE.mpPort}/pay/${id}` });
+      if (!req.headers["x-idempotency-key"]) return json(res, 400, { message: "idempotency" });
+      const id = `ORDTST${++n}`;
+      orders.set(id, { ...JSON.parse(body), id, status: "created", status_detail: "created" });
+      return json(res, 201, {
+        id,
+        status: "created",
+        checkout_url: `http://127.0.0.1:${FAKE.mpPort}/pay/${id}`,
+      });
     }
     if (req.method === "GET" && u.pathname.startsWith("/pay/")) {
       const id = u.pathname.slice(5);
@@ -72,40 +77,39 @@ export function startFakes(appUrl: string): Promise<Server[]> {
       );
     }
     if (req.method === "POST" && u.pathname.startsWith("/pay/")) {
-      const pref = prefs.get(u.pathname.slice(5))!;
-      const items = pref.items as { unit_price: number }[];
-      const paymentId = String(9_000_000 + n);
-      payments.set(paymentId, {
-        id: Number(paymentId),
-        status: "approved",
+      const id = u.pathname.slice(5);
+      const order = orders.get(id)!;
+      Object.assign(order, {
+        status: "processed",
         status_detail: "accredited",
-        external_reference: pref.external_reference,
-        transaction_amount: items[0].unit_price,
-        currency_id: "ARS",
-        payment_type_id: "credit_card",
+        total_paid_amount: order.total_amount,
+        currency: "ARS",
+        transactions: {
+          payments: [
+            { status: "processed", payment_method: { id: "master", type: "credit_card" } },
+          ],
+        },
       });
-      const requestId = `req-${paymentId}`;
-      const ts = String(Math.floor(Date.now() / 1000));
-      await fetch(`${appUrl}/api/webhooks/mercadopago?data.id=${paymentId}&type=payment`, {
+      const requestId = `req-${id}`;
+      const ts = String(Date.now());
+      await fetch(`${appUrl}/api/webhooks/mercadopago?data.id=${id}&type=order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "x-request-id": requestId,
-          "x-signature": signForTest({ dataId: paymentId, requestId, ts, secret: FAKE.mpSecret }),
+          "x-signature": signForTest({ dataId: id, requestId, ts, secret: FAKE.mpSecret }),
         },
-        body: JSON.stringify({
-          type: "payment",
-          action: "payment.created",
-          data: { id: paymentId },
-        }),
+        body: JSON.stringify({ type: "order", action: "order.processed", data: { id } }),
       });
-      const back = (pref.back_urls as { success: string }).success;
-      res.writeHead(303, { Location: `${back}&status=approved&payment_id=${paymentId}` });
+      const back = (order.config as { online: { success_url: string } }).online.success_url;
+      res.writeHead(303, {
+        Location: `${back}&status=approved&order_id=${id}&external_reference=${order.external_reference}`,
+      });
       return res.end();
     }
-    if (req.method === "GET" && u.pathname.startsWith("/v1/payments/")) {
-      const p = payments.get(u.pathname.split("/").pop()!);
-      return p ? json(res, 200, p) : json(res, 404, { message: "not found" });
+    if (req.method === "GET" && u.pathname.startsWith("/v1/orders/")) {
+      const o = orders.get(u.pathname.split("/").pop()!);
+      return o ? json(res, 200, o) : json(res, 404, { message: "not found" });
     }
     json(res, 404, { message: "no" });
   });

@@ -3,11 +3,10 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 /**
  * Firma de los webhooks de Mercado Pago (docs/05).
  *
- * Header `x-signature: ts=…,v1=…` + header `x-request-id` + `data.id` del query string + la clave
- * secreta de "Tus integraciones" (doc oficial de Webhooks). La doc pública no publica la plantilla:
- * se usa la de los SDKs oficiales, `id:{data.id};request-id:{x-request-id};ts:{ts};` con
- * HMAC-SHA256 en hex, `data.id` en minúsculas si es alfanumérico y omitiendo las partes ausentes.
- * TODO(brai): confirmar con el simulador de webhooks de MP (o el MCP) al tener credenciales.
+ * Header `x-signature: ts=…,v1=…` + header `x-request-id` + `data.id` del query string + la firma
+ * secreta de "Configuración de Webhooks". Plantilla según la doc oficial de Checkout Pro (Orders),
+ * "Validar el origen de la notificación": `id:{data.id};request-id:{x-request-id};ts:{ts};`,
+ * HMAC-SHA256 en hex, `data.id` en minúsculas (ORD01… → ord01…) y omitiendo las partes ausentes.
  *
  * No se valida la antigüedad de `ts`: MP reintenta cada 15 min con el mismo evento y el
  * procesamiento ya es idempotente (y el pago se consulta a la API, nunca se toma del body).

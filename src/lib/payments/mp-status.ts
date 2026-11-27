@@ -3,69 +3,93 @@ import { config } from "../config";
 import { toPesos } from "../domain/pricing";
 
 /**
- * Pago de Mercado Pago → qué hacer con el pedido (docs/05). Pura.
- * Campos según la referencia oficial de `GET /v1/payments/{id}` (status, status_detail,
- * external_reference, transaction_amount, currency_id, payment_type_id).
+ * Order de Mercado Pago → qué hacer con el pedido (docs/05). Pura.
+ * Campos según la doc oficial de la API de Orders (`GET /v1/orders/{id}`, "Estado de la order"):
+ * status, status_detail, external_reference, total_amount, total_paid_amount, currency,
+ * created_date y transactions.payments[].payment_method.type.
  */
 
-export const mpPaymentSchema = z.looseObject({
-  id: z.union([z.number(), z.string()]).transform(String),
+export const mpOrderSchema = z.looseObject({
+  id: z.string(),
   status: z.string(),
   status_detail: z.string().nullish(),
   external_reference: z.string().nullish(),
-  transaction_amount: z.coerce.number(),
-  currency_id: z.string(),
-  payment_type_id: z.string().nullish(),
-  date_of_expiration: z.string().nullish(),
+  total_paid_amount: z.coerce.number().nullish(),
+  currency: z.string().nullish(),
+  created_date: z.string().nullish(),
+  transactions: z
+    .looseObject({
+      payments: z
+        .array(
+          z.looseObject({
+            status: z.string().nullish(),
+            payment_method: z.looseObject({ type: z.string().nullish() }).nullish(),
+          }),
+        )
+        .nullish(),
+    })
+    .nullish(),
 });
-export type MpPayment = z.infer<typeof mpPaymentSchema>;
+export type MpOrder = z.infer<typeof mpOrderSchema>;
 
 export type MpAction =
   | { kind: "pay" }
   /** Pendiente: si es efectivo (ticket), se extiende la reserva hasta `holdUntil`. */
   | { kind: "wait"; holdUntil?: Date }
-  /** Rechazado/cancelado: el pedido sigue pendiente hasta vencer; el cliente puede reintentar. */
+  /** Fallida/cancelada/vencida: el pedido sigue pendiente hasta vencer; el cliente puede reintentar. */
   | { kind: "ignore" }
   | { kind: "cancel"; reason: string }
-  /** Algo no cierra (monto, moneda, disputa, estado desconocido): lo mira Eric. */
+  /** Algo no cierra (monto, moneda, reembolso parcial, estado desconocido): lo mira Eric. */
   | { kind: "attention"; reason: string };
 
-export function mpPaymentAction(
-  p: Pick<
-    MpPayment,
-    "status" | "transaction_amount" | "currency_id" | "payment_type_id" | "date_of_expiration"
+/** Clave de idempotencia del evento: el mismo estado no se aplica dos veces. */
+export const mpOrderEventStatus = (o: Pick<MpOrder, "status" | "status_detail">) =>
+  o.status_detail ? `${o.status}/${o.status_detail}` : o.status;
+
+const isTicket = (o: Pick<MpOrder, "transactions">) =>
+  (o.transactions?.payments ?? []).some((p) => p.payment_method?.type === "ticket");
+
+export function mpOrderAction(
+  o: Pick<
+    MpOrder,
+    "status" | "status_detail" | "total_paid_amount" | "currency" | "created_date" | "transactions"
   >,
   order: { total: number },
   now: Date,
 ): MpAction {
-  switch (p.status) {
-    case "approved": {
-      if (p.currency_id !== "ARS") return { kind: "attention", reason: `moneda ${p.currency_id}` };
-      const paid = toPesos(p.transaction_amount);
+  switch (o.status) {
+    case "processed": {
+      if (o.status_detail === "partially_refunded") {
+        return { kind: "attention", reason: "reembolso parcial de Mercado Pago" };
+      }
+      if (o.currency && o.currency !== "ARS") {
+        return { kind: "attention", reason: `moneda ${o.currency}` };
+      }
+      const paid = toPesos(o.total_paid_amount ?? 0);
       if (paid !== order.total) {
         return { kind: "attention", reason: `monto pagado ${paid} ≠ total ${order.total}` };
       }
       return { kind: "pay" };
     }
-    case "pending":
-    case "in_process":
-    case "authorized": {
-      if (p.payment_type_id !== "ticket") return { kind: "wait" };
-      const extra = config.cashHoldExtraHours * 3_600_000;
-      const exp = p.date_of_expiration ? Date.parse(p.date_of_expiration) : NaN;
-      const base = Number.isNaN(exp) ? now.getTime() + config.cashTicketDays * 86_400_000 : exp;
-      return { kind: "wait", holdUntil: new Date(base + extra) };
+    case "created":
+    case "processing":
+    case "action_required": {
+      if (!isTicket(o)) return { kind: "wait" };
+      // El ticket vence `cashTicketDays` después de creada la order (default_payment_due_date).
+      const created = o.created_date ? Date.parse(o.created_date) : NaN;
+      const base = Number.isNaN(created) ? now.getTime() : created;
+      const holdUntil =
+        base + config.cashTicketDays * 86_400_000 + config.cashHoldExtraHours * 3_600_000;
+      return { kind: "wait", holdUntil: new Date(holdUntil) };
     }
-    case "rejected":
-    case "cancelled":
+    case "failed":
+    case "canceled":
       return { kind: "ignore" };
     case "refunded":
       return { kind: "cancel", reason: "reembolso de Mercado Pago" };
     case "charged_back":
       return { kind: "cancel", reason: "contracargo de Mercado Pago" };
-    case "in_mediation":
-      return { kind: "attention", reason: "pago en disputa (mediación de MP)" };
     default:
-      return { kind: "attention", reason: `estado de MP desconocido: ${p.status}` };
+      return { kind: "attention", reason: `estado de MP desconocido: ${o.status}` };
   }
 }

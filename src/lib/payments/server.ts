@@ -30,16 +30,13 @@ export function orderUrl(o: Pick<OrderForPayment, "code" | "trackingToken">): st
 export const mercadoPago: PaymentProvider = {
   id: "MP",
   async start(order) {
-    const pref = await mpClient().createPreference({
+    const mpOrder = await mpClient().createCheckoutOrder({
       orderId: order.id,
       code: order.code,
       total: order.total,
       returnUrl: orderUrl(order),
-      notificationUrl: `${env().SITE_URL}/api/webhooks/mercadopago`,
-      expiresAt: order.paymentDueAt,
-      now: new Date(),
     });
-    return { kind: "redirect", url: pref.init_point };
+    return { kind: "redirect", url: mpOrder.checkout_url };
   },
 };
 

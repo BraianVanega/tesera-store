@@ -1,70 +1,80 @@
 import { describe, expect, it, vi } from "vitest";
 import { ORDER_CODE_RE, orderCode, safeTokenEqual, trackingToken } from "../orders/code";
-import { buildPreference, createMpClient, mpDate } from "./mercadopago";
-import { mpPaymentAction, mpPaymentSchema } from "./mp-status";
+import { buildCheckoutOrder, createMpClient, mpAmount } from "./mercadopago";
+import { mpOrderAction, mpOrderEventStatus, mpOrderSchema } from "./mp-status";
 import { parseSignatureHeader, signatureManifest, signForTest, verifyMpSignature } from "./webhook";
 
 const now = new Date("2026-11-26T15:00:00Z");
-const pay = (over: Record<string, unknown> = {}) =>
-  mpPaymentSchema.parse({
-    id: 999,
-    status: "approved",
+const mpo = (over: Record<string, unknown> = {}) =>
+  mpOrderSchema.parse({
+    id: "ORDTST01KS5AJ6HTK2HRQ3XJ3C2JCKP9",
+    status: "processed",
     status_detail: "accredited",
     external_reference: "ord_1",
-    transaction_amount: "51460.00",
-    currency_id: "ARS",
-    payment_type_id: "credit_card",
+    total_amount: "51460.00",
+    total_paid_amount: "51460.00",
+    currency: "ARS",
+    created_date: "2026-11-26T15:00:00.000Z",
+    transactions: { payments: [{ status: "processed", payment_method: { type: "credit_card" } }] },
     ...over,
   });
+const ticket = { payments: [{ status: "action_required", payment_method: { type: "ticket" } }] };
 
-describe("estado de pago de MP → acción", () => {
+describe("estado de la order de MP → acción", () => {
   const order = { total: 51_460 };
 
-  it("aprobado con el monto exacto → pagar", () => {
-    expect(pay().id).toBe("999");
-    expect(mpPaymentAction(pay(), order, now)).toEqual({ kind: "pay" });
+  it("procesada y acreditada con el monto exacto → pagar", () => {
+    expect(mpOrderAction(mpo(), order, now)).toEqual({ kind: "pay" });
+    expect(mpOrderEventStatus(mpo())).toBe("processed/accredited");
+    expect(mpOrderEventStatus({ status: "created", status_detail: null })).toBe("created");
   });
-  it("aprobado con otro monto o moneda → atención, nunca pagar", () => {
-    expect(mpPaymentAction(pay({ transaction_amount: 100 }), order, now)).toEqual({
+  it("otro monto, otra moneda o reembolso parcial → atención, nunca pagar", () => {
+    expect(mpOrderAction(mpo({ total_paid_amount: "100.00" }), order, now)).toEqual({
       kind: "attention",
       reason: "monto pagado 100 ≠ total 51460",
     });
-    expect(mpPaymentAction(pay({ currency_id: "USD" }), order, now).kind).toBe("attention");
+    expect(mpOrderAction(mpo({ total_paid_amount: null }), order, now).kind).toBe("attention");
+    expect(mpOrderAction(mpo({ currency: "USD" }), order, now).kind).toBe("attention");
+    expect(mpOrderAction(mpo({ status_detail: "partially_refunded" }), order, now)).toEqual({
+      kind: "attention",
+      reason: "reembolso parcial de Mercado Pago",
+    });
   });
   it("pendiente con tarjeta → esperar sin tocar la reserva", () => {
-    expect(mpPaymentAction(pay({ status: "in_process" }), order, now)).toEqual({ kind: "wait" });
-    expect(mpPaymentAction(pay({ status: "authorized" }), order, now)).toEqual({ kind: "wait" });
+    for (const status of ["created", "processing", "action_required"]) {
+      expect(mpOrderAction(mpo({ status }), order, now)).toEqual({ kind: "wait" });
+    }
+    expect(mpOrderAction(mpo({ status: "processing", transactions: null }), order, now)).toEqual({
+      kind: "wait",
+    });
   });
-  it("ticket de efectivo → la reserva dura lo que el ticket", () => {
-    const withExp = mpPaymentAction(
-      pay({
-        status: "pending",
-        payment_type_id: "ticket",
-        date_of_expiration: "2026-11-29T23:59:59.000-03:00",
-      }),
+  it("ticket de efectivo → la reserva dura lo que el ticket (desde la creación de la order)", () => {
+    const withDate = mpOrderAction(
+      mpo({ status: "action_required", status_detail: "waiting_payment", transactions: ticket }),
       order,
       now,
     );
-    expect(withExp).toEqual({ kind: "wait", holdUntil: new Date("2026-11-30T08:59:59.000Z") });
-    const noExp = mpPaymentAction(
-      pay({ status: "pending", payment_type_id: "ticket" }),
+    expect(withDate).toEqual({ kind: "wait", holdUntil: new Date("2026-11-29T21:00:00.000Z") });
+    const noDate = mpOrderAction(
+      mpo({ status: "action_required", created_date: null, transactions: ticket }),
       order,
-      now,
+      new Date("2026-11-27T15:00:00Z"),
     );
-    expect(noExp).toEqual({ kind: "wait", holdUntil: new Date("2026-11-29T21:00:00.000Z") });
+    expect(noDate).toEqual({ kind: "wait", holdUntil: new Date("2026-11-30T21:00:00.000Z") });
   });
-  it("rechazado/cancelado → nada (sigue pendiente hasta vencer)", () => {
-    expect(mpPaymentAction(pay({ status: "rejected" }), order, now)).toEqual({ kind: "ignore" });
-    expect(mpPaymentAction(pay({ status: "cancelled" }), order, now)).toEqual({ kind: "ignore" });
+  it("fallida, cancelada o vencida → nada (sigue pendiente hasta vencer)", () => {
+    expect(mpOrderAction(mpo({ status: "failed" }), order, now)).toEqual({ kind: "ignore" });
+    expect(
+      mpOrderAction(mpo({ status: "canceled", status_detail: "expired" }), order, now),
+    ).toEqual({ kind: "ignore" });
   });
-  it("reembolso, contracargo, mediación y desconocido", () => {
-    expect(mpPaymentAction(pay({ status: "refunded" }), order, now)).toEqual({
+  it("reembolso, contracargo y desconocido", () => {
+    expect(mpOrderAction(mpo({ status: "refunded" }), order, now)).toEqual({
       kind: "cancel",
       reason: "reembolso de Mercado Pago",
     });
-    expect(mpPaymentAction(pay({ status: "charged_back" }), order, now).kind).toBe("cancel");
-    expect(mpPaymentAction(pay({ status: "in_mediation" }), order, now).kind).toBe("attention");
-    expect(mpPaymentAction(pay({ status: "raro" }), order, now)).toEqual({
+    expect(mpOrderAction(mpo({ status: "charged_back" }), order, now).kind).toBe("cancel");
+    expect(mpOrderAction(mpo({ status: "raro" }), order, now)).toEqual({
       kind: "attention",
       reason: "estado de MP desconocido: raro",
     });
@@ -101,59 +111,51 @@ describe("firma del webhook", () => {
     );
   });
   it("plantilla: id en minúsculas, partes ausentes omitidas", () => {
-    expect(signatureManifest("ABC123", "r", "1")).toBe("id:abc123;request-id:r;ts:1;");
+    expect(signatureManifest("ORD01JQ4S4KY8HWQ6NA5PXB65B3D3", "r", "1")).toBe(
+      "id:ord01jq4s4ky8hwq6na5pxb65b3d3;request-id:r;ts:1;",
+    );
     expect(signatureManifest("a-b", null, "1")).toBe("id:a-b;ts:1;");
     expect(signatureManifest(null, null, "1")).toBe("ts:1;");
     expect(parseSignatureHeader(" ts=1 , v1=ab=c")).toEqual({ ts: "1", v1: "ab=c" });
   });
 });
 
-describe("preferencia de Checkout Pro", () => {
+describe("order de Checkout Pro", () => {
   const input = {
     orderId: "ord_1",
     code: "TS-7K3QX9",
     total: 56_900,
     returnUrl: "https://tesera.com.ar/pedido/TS-7K3QX9?t=tok",
-    notificationUrl: "https://tesera.com.ar/api/webhooks/mercadopago",
-    expiresAt: new Date("2026-11-26T17:00:00Z"),
-    now,
   };
 
   it("un ítem neutro por el total, sin datos del comprador", () => {
-    const b = buildPreference(input);
+    const b = buildCheckoutOrder(input);
     expect(b).toEqual({
-      items: [
-        {
-          id: "TS-7K3QX9",
-          title: "Pedido Tésera",
-          quantity: 1,
-          unit_price: 56_900,
-          currency_id: "ARS",
-        },
-      ],
+      type: "online",
+      processing_mode: "manual",
+      total_amount: "56900.00",
       external_reference: "ord_1",
-      notification_url: input.notificationUrl,
-      back_urls: { success: input.returnUrl, pending: input.returnUrl, failure: input.returnUrl },
-      auto_return: "approved",
-      statement_descriptor: "TESERA",
-      expires: true,
-      expiration_date_from: "2026-11-26T12:00:00.000-03:00",
-      expiration_date_to: "2026-11-26T14:00:00.000-03:00",
-      date_of_expiration: "2026-11-29T12:00:00.000-03:00",
+      expiration_time: "P4D",
+      items: [{ title: "Pedido Tésera", quantity: 1, unit_price: "56900.00" }],
+      config: {
+        statement_descriptor: "TESERA",
+        default_payment_due_date: "P3D",
+        online: {
+          success_url: input.returnUrl,
+          pending_url: input.returnUrl,
+          failure_url: input.returnUrl,
+          auto_return: "approved",
+        },
+      },
     });
-    expect(JSON.stringify(b)).not.toMatch(/payer|email/);
+    expect(JSON.stringify(b)).not.toMatch(/payer|email|notification_url/);
   });
-  it("en local (http) no manda webhook ni auto_return", () => {
-    const b = buildPreference({
-      ...input,
-      returnUrl: "http://localhost:3000/x",
-      notificationUrl: "http://localhost:3000/w",
-    });
-    expect(b).not.toHaveProperty("notification_url");
-    expect(b).not.toHaveProperty("auto_return");
+  it("en local (http) no manda auto_return", () => {
+    const b = buildCheckoutOrder({ ...input, returnUrl: "http://localhost:3000/x" });
+    expect(b.config.online).not.toHaveProperty("auto_return");
   });
-  it("mpDate en hora de Argentina", () => {
-    expect(mpDate(new Date("2026-01-01T03:00:00Z"))).toBe("2026-01-01T00:00:00.000-03:00");
+  it("montos con dos decimales", () => {
+    expect(mpAmount(1)).toBe("1.00");
   });
 });
 
@@ -161,44 +163,64 @@ describe("cliente de MP", () => {
   const reply = (status: number, body: unknown) =>
     new Response(body === undefined ? "x" : JSON.stringify(body), { status });
 
-  it("crea la preferencia con Bearer y registra sin PII", async () => {
-    const f = vi.fn(async () =>
-      reply(201, { id: "pref_1", init_point: "https://mp.test/start?pref_id=1" }),
-    );
+  it("crea la order con Bearer e idempotencia, reintenta con la MISMA clave y registra sin PII", async () => {
+    const f = vi
+      .fn()
+      .mockResolvedValueOnce(reply(500, { message: "caído" }))
+      .mockResolvedValueOnce(
+        reply(201, {
+          id: "ORDTST1",
+          checkout_url: "https://www.mercadopago.com.ar/checkout/v1/redirect?order_id=ORDTST1",
+        }),
+      );
     const logs: unknown[] = [];
     const mp = createMpClient({
       accessToken: "TEST-x",
       baseUrl: "https://mp.test/",
       fetch: f as never,
       log: (e) => void logs.push(e),
+      idempotencyKey: () => "key-1",
     });
-    const pref = await mp.createPreference({
+    const o = await mp.createCheckoutOrder({
       orderId: "o",
       code: "TS-1",
       total: 1,
       returnUrl: "https://a/b",
-      notificationUrl: "https://a/w",
-      expiresAt: now,
-      now,
     });
-    expect(pref.init_point).toBe("https://mp.test/start?pref_id=1");
-    const [url, init] = f.mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe("https://mp.test/checkout/preferences");
-    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer TEST-x");
-    expect(logs).toEqual([{ action: "mp.preference", ok: true, orderCode: "TS-1" }]);
+    expect(o.checkout_url).toContain("order_id=ORDTST1");
+    expect(f).toHaveBeenCalledTimes(2);
+    for (const [url, init] of f.mock.calls as unknown as [string, RequestInit][]) {
+      expect(url).toBe("https://mp.test/v1/orders");
+      const h = init.headers as Record<string, string>;
+      expect(h.Authorization).toBe("Bearer TEST-x");
+      expect(h["X-Idempotency-Key"]).toBe("key-1");
+    }
+    expect(logs).toEqual([{ action: "mp.order", ok: true, orderCode: "TS-1" }]);
   });
 
-  it("consulta un pago y reintenta ante 5xx o red", async () => {
+  it("cada intento de pago usa una clave nueva", async () => {
+    const f = vi.fn(async () => reply(201, { id: "O", checkout_url: "https://mp.test/c" }));
+    const mp = createMpClient({ accessToken: "t", fetch: f as never });
+    const input = { orderId: "o", code: "TS-1", total: 1, returnUrl: "https://a/b" };
+    await mp.createCheckoutOrder(input);
+    await mp.createCheckoutOrder(input);
+    const keys = (f.mock.calls as unknown as [string, RequestInit][]).map(
+      ([, i]) => (i.headers as Record<string, string>)["X-Idempotency-Key"],
+    );
+    expect(keys[0]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(keys[0]).not.toBe(keys[1]);
+  });
+
+  it("consulta una order y reintenta ante 5xx o red", async () => {
     const f = vi
       .fn()
       .mockResolvedValueOnce(reply(503, { message: "caído" }))
       .mockRejectedValueOnce(Object.assign(new Error(), { name: "TimeoutError" }))
-      .mockResolvedValueOnce(
-        reply(200, { id: 5, status: "approved", transaction_amount: 10, currency_id: "ARS" }),
-      );
+      .mockResolvedValueOnce(reply(200, { id: "ORD5", status: "processed" }));
     const mp = createMpClient({ accessToken: "t", fetch: f });
-    expect((await mp.getPayment("5")).status).toBe("approved");
-    expect(f.mock.calls[0][0]).toBe("https://api.mercadopago.com/v1/payments/5");
+    expect((await mp.getOrder("ORD5")).status).toBe("processed");
+    expect(f.mock.calls[0][0]).toBe("https://api.mercadopago.com/v1/orders/ORD5");
+    expect((f.mock.calls[0][1] as RequestInit).headers).not.toHaveProperty("X-Idempotency-Key");
   });
 
   it("errores: 4xx con mensaje, respuesta inválida, sin JSON y log que falla", async () => {
@@ -213,21 +235,21 @@ describe("cliente de MP", () => {
         },
       });
     };
-    await expect(make(reply(404, { message: "not found" })).getPayment("1")).rejects.toMatchObject({
+    await expect(make(reply(404, { message: "not found" })).getOrder("1")).rejects.toMatchObject({
       message: "not found",
       status: 404,
     });
-    await expect(make(reply(200, { nada: 1 })).getPayment("1")).rejects.toMatchObject({
+    await expect(make(reply(200, { nada: 1 })).getOrder("1")).rejects.toMatchObject({
       message: "Respuesta de Mercado Pago inesperada",
     });
-    await expect(make(reply(400, undefined)).getPayment("1")).rejects.toMatchObject({
+    await expect(make(reply(400, undefined)).getOrder("1")).rejects.toMatchObject({
       message: "HTTP 400",
     });
     const net = createMpClient({
       accessToken: "t",
       fetch: vi.fn().mockRejectedValue(new TypeError("x")),
     });
-    await expect(net.getPayment("1")).rejects.toMatchObject({ message: "Error de red" });
+    await expect(net.getOrder("1")).rejects.toMatchObject({ message: "Error de red" });
   });
 });
 

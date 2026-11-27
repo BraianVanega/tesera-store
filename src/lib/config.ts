@@ -32,8 +32,8 @@ export const config = {
   mpHoldHours: 2,
 
   /**
-   * Efectivo vía MP (Rapipago / Pago Fácil): vencimiento del ticket (`date_of_expiration` de la
-   * preferencia; MP recomienda al menos 3 días) + 2 h hábiles de acreditación. Reserva = ticket + margen.
+   * Efectivo vía MP (Rapipago / Pago Fácil): vencimiento del ticket (`default_payment_due_date` de
+   * la order; MP recomienda al menos 3 días) + 2 h hábiles de acreditación. Reserva = ticket + margen.
    */
   cashTicketDays: 3,
   cashHoldExtraHours: 6,
@@ -44,9 +44,9 @@ export const config = {
   /** Mercado Pago Checkout Pro (docs/05). */
   mp: {
     apiBaseUrl: "https://api.mercadopago.com",
-    /** Ítem neutro de la preferencia: nunca nombres de producto. */
+    /** Ítem neutro de la order: nunca nombres de producto. */
     itemTitle: "Pedido Tésera",
-    /** Resumen de tarjeta. TODO(brai): nombre de fantasía definitivo y largo máximo que acepta MP. */
+    /** Resumen de tarjeta (MP acepta hasta 13 caracteres). TODO(brai): nombre de fantasía definitivo. */
     statementDescriptor: "TESERA",
   },
 

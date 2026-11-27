@@ -2,11 +2,11 @@ import type { PrismaClient } from "@prisma/client";
 import { cancelOrder } from "../orders/cancel";
 import { markPaid, recordPaymentEvent, type Dispatcher } from "../orders/mark-paid";
 import type { MpClient } from "./mercadopago";
-import { mpPaymentAction } from "./mp-status";
+import { mpOrderAction, mpOrderEventStatus } from "./mp-status";
 
 /**
- * Notificación de pago de MP → pedido (docs/05). El pago se consulta a la API (nunca el body).
- * Idempotente por `PaymentEvent(provider, externalId, status)`.
+ * Notificación de MP (tópico `order`) → pedido (docs/05). La order se consulta a la API (nunca el
+ * body). Idempotente por `PaymentEvent(provider, externalId = id de la order, status/status_detail)`.
  */
 
 export type ProcessResult =
@@ -23,15 +23,15 @@ export type ProcessResult =
         | "attention";
     };
 
-export async function processMpPayment(
+export async function processMpOrder(
   db: PrismaClient,
-  mp: Pick<MpClient, "getPayment">,
-  paymentId: string,
+  mp: Pick<MpClient, "getOrder">,
+  mpOrderId: string,
   opts: { now?: Date; dispatch?: Dispatcher } = {},
 ): Promise<ProcessResult> {
   const now = opts.now ?? new Date();
-  const payment = await mp.getPayment(paymentId);
-  const orderId = payment.external_reference;
+  const mpOrder = await mp.getOrder(mpOrderId);
+  const orderId = mpOrder.external_reference;
   const order = orderId
     ? await db.order.findUnique({
         where: { id: orderId },
@@ -42,11 +42,11 @@ export async function processMpPayment(
 
   const event = {
     provider: "MP" as const,
-    externalId: payment.id,
-    status: payment.status,
-    amount: Math.round(payment.transaction_amount),
+    externalId: mpOrder.id,
+    status: mpOrderEventStatus(mpOrder),
+    amount: Math.round(mpOrder.total_paid_amount ?? 0),
   };
-  const action = mpPaymentAction(payment, order, now);
+  const action = mpOrderAction(mpOrder, order, now);
 
   switch (action.kind) {
     case "pay": {
