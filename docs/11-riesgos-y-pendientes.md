@@ -10,7 +10,7 @@
 - **La lista de precios para stock por mayor es la misma `costoCliente` de la API** (no hay otra lista).
 - Envío al interior por **Mercado Envíos**.
 
-## Preguntas abiertas para SM (bloquean la Fase 3)
+## Preguntas abiertas para SM (ya no bloquean: se resuelven en producción)
 
 - [ ] **Tope diario** de requests: SM tampoco lo sabe (25/11). Se asume conservador y el cliente lee los headers `X-RateLimit-Daily-*` para autorregularse (ver `04`). Reconfirmar cuando haya una key activa.
 - [ ] Lista completa de valores de `fulfillmentStatus`: SM no la sabe. Se descubren en producción (el poll loguea cada valor nuevo) y mientras tanto `DELIVERED` lo marca Eric a mano.
@@ -28,14 +28,20 @@
 - [ ] **Regla de precio de lista** (Fase 2): `Product.price` = costo + margen + 5 % MP (docs/04), pero falta el margen. Hoy los borradores importados toman `precioSugeridoPublico` como referencia.
 - [ ] **Datos para los ≥ 50 productos reales** (Fase 2): un JSON de `/products` de SM (o la API key) o el CSV de Buttman/SM con su formato. Al curar: categoría, precio, si es consumible y publicar.
 - [ ] Plazo de **Interior** en el badge: hoy "Envío 3 a 6 días"; docs/04 pide tomarlo de la cotización.
-- [ ] Valor de `SM_STALE_HOURS` (oferta vieja = sin stock): se define en la Fase 3.
+- [ ] Valor de `config.sm.staleHours` (oferta vieja = sin stock): hoy **6 h**. ¿Va?
+- [ ] **`SM_API_KEY` en `.env.local`** para probar contra la API real (sync, stock y cotizaciones; nunca se crean pedidos de prueba).
+- [ ] Forma real de `GET /stock`: la doc no la muestra; se asumió `sku`/`stock`/`estado`.
+- [ ] Secrets del repo de GitHub `CRON_BASE_URL` y `CRON_SECRET` (el mismo de Vercel) para los crons frecuentes de SM. Alternativa: Vercel Pro y todo en `vercel.json`.
+- [ ] **Precio del cadete en MdP** por debajo de $ 15.000 (Fase 5), y si hay un cadete por tanda o uno solo.
+- [ ] **Número de WhatsApp** para el comprobante de transferencia (Fase 5, `WHATSAPP_NUMBER`).
+- [ ] **Credenciales de prueba de MP** (Fase 5). El MCP ayuda a integrar, pero la tienda llama a la API de MP con `MP_ACCESS_TOKEN`.
 - [ ] Nombre de fantasía definitivo para `statement_descriptor` y confirmar longitud permitida por MP.
 - [ ] Textos legales con un profesional (términos, privacidad, cambios, arrepentimiento).
 - [ ] Retención de datos (`PII_RETENTION_MONTHS`).
 - [ ] Confirmar: ¿email transaccional al cliente? (el panel de Eric es el único aviso interno; el cliente necesita al menos la confirmación y el link de seguimiento).
 - [ ] Qué ve Eric de costos y de la liquidación.
 - [ ] Proveedor del plan B de pagos (cripto u otro) cuando se decida.
-- [ ] **GBA sin cotización** (Fase 4): sin la cotización de SM (Fase 3) solo CABA se reconoce por CP; un CP de GBA cae en "Interior" (badge "Envío 3 a 6 días" y sin umbral de envío gratis). Se corrige cuando la zona salga de la cotización (`moova-flex`). ¿Alcanza mientras tanto o cargamos una lista de CP del conurbano?
+- [x] ~~**GBA sin cotización**~~: resuelto en la Fase 3; la zona sale de la cotización (`moova-flex`). Solo sin SM se vuelve a la detección por CP.
 - [ ] **Envío gratis por tanda en MdP** (Fase 4): con carrito mixto, la barra mide solo lo que llega hoy (como en el diseño). Confirmar que la tanda de 5 a 10 días paga su envío aparte (o va gratis).
 - [ ] **"Salir ya"** lleva a `https://www.smn.gob.ar/` (`src/lib/shop/constants.ts`). Confirmar el sitio neutro. Borra carrito y zona; deja el modo discreto prendido.
 - [ ] **Lighthouse mobile ≥ 90** en home y ficha (aceptación de la Fase 4): no se pudo correr en esta sesión.
