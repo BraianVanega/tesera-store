@@ -191,18 +191,13 @@ async function Cart() {
 
       <div className="sticky bottom-0 z-10 border-t border-border bg-bg py-3">
         <div className={wrap}>
-          {/* TODO(fase-5): checkout de 3 pasos. Hasta entonces el botón queda deshabilitado. */}
-          <button
-            type="button"
-            className="m-pill min-h-12 w-full"
-            disabled
-            aria-describedby="cta-nota"
+          <Link
+            href="/checkout"
+            className={`m-pill min-h-12 w-full ${v.canCheckout ? "" : "pointer-events-none"}`}
+            aria-disabled={!v.canCheckout || undefined}
           >
             Continuar con tus datos
-          </button>
-          <p id="cta-nota" className="m-0 pt-1.5 text-center text-xs text-text-2">
-            Muy pronto vas a poder pagar desde acá.
-          </p>
+          </Link>
         </div>
       </div>
     </>

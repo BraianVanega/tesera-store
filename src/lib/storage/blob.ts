@@ -32,3 +32,34 @@ export async function downloadImage(
   if (body.byteLength > MAX_BYTES) throw new Error("Imagen demasiado grande");
   return { body, contentType };
 }
+
+/** Tipos de comprobante aceptados (foto o PDF del banco). */
+export const PROOF_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/heic": "heic",
+  "application/pdf": "pdf",
+};
+export const PROOF_MAX_BYTES = 10 * 1024 * 1024;
+
+/**
+ * Comprobante de transferencia: Blob PRIVADO (datos bancarios del cliente, docs/07). Solo se lee
+ * desde el panel con el token del servidor. Ruta neutra: código de pedido + sufijo aleatorio.
+ */
+export async function uploadPrivateProof(
+  code: string,
+  file: Blob,
+  contentType: string,
+  token: string,
+): Promise<string> {
+  const ext = PROOF_TYPES[contentType];
+  if (!ext) throw new Error("Tipo de archivo no soportado");
+  const blob = await put(`comprobantes/${code}.${ext}`, file, {
+    access: "private",
+    contentType,
+    token,
+    addRandomSuffix: true,
+  });
+  return blob.url;
+}
