@@ -1,8 +1,9 @@
-name: SM cron
+name: Crons
 
-# Vercel Hobby solo permite crons diarios (el sync completo está en vercel.json).
-# Los frecuentes (stock cada hora; incremental y seguimiento de pedidos cada 2 h) los dispara
-# este workflow contra las mismas rutas, con el mismo CRON_SECRET.
+# Vercel Hobby solo permite crons diarios (el sync completo de SM está en vercel.json).
+# Los frecuentes los dispara este workflow contra las mismas rutas, con el mismo CRON_SECRET:
+# cada hora, pedidos (vencer transferencias impagas, reintentar despachos) y stock de SM;
+# cada 2 h, catálogo incremental y seguimiento de pedidos en SM.
 # Secrets del repo: CRON_BASE_URL (ej. https://tesera.com.ar) y CRON_SECRET.
 
 on:
@@ -21,6 +22,10 @@ jobs:
       - name: Sin configurar → no hace nada
         if: env.BASE == '' || env.SECRET == ''
         run: echo "Faltan CRON_BASE_URL / CRON_SECRET" && exit 0
+      - name: Pedidos (vencimientos y reintentos)
+        if: env.BASE != '' && env.SECRET != ''
+        run: |
+          curl -fsS --max-time 300 -H "Authorization: Bearer $SECRET" "$BASE/api/cron/orders-maintenance"
       - name: Stock
         if: env.BASE != '' && env.SECRET != ''
         run: |

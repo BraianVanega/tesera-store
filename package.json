@@ -17,7 +17,8 @@
     "db:seed": "prisma db seed",
     "postinstall": "prisma generate",
     "sm:sync": "tsx scripts/sm-sync.ts",
-    "catalog:import": "tsx scripts/import-sm-catalog.ts"
+    "catalog:import": "tsx scripts/import-sm-catalog.ts",
+    "order:mark-paid": "tsx scripts/mark-paid.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
