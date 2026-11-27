@@ -50,7 +50,7 @@ pnpm lint && pnpm typecheck
 pnpm prisma migrate dev
 pnpm db:seed             # catálogo de ejemplo
 pnpm catalog:import --file products.json [--images] [--dry-run]  # borradores desde /products de SM
-pnpm sm:sync             # sincroniza stock/costos de SM (script en scripts/)
+pnpm sm:sync [stock|products [--full] [--images]|quote --cp 1824|provinces]  # SM (necesita SM_API_KEY)
 ```
 
 ## Reglas de negocio que NO se negocian

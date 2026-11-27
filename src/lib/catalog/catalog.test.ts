@@ -194,7 +194,7 @@ describe("producto de catálogo", () => {
   };
 
   it("arma la entrada de availability con stock local disponible", () => {
-    const p = toCatalogProduct(row);
+    const p = toCatalogProduct(row, now);
     expect(p.availabilityInput).toEqual({
       isConsumable: true,
       localQuantity: 2,
@@ -205,6 +205,15 @@ describe("producto de catálogo", () => {
   });
 
   it("sin LocalStock → 0 local", () => {
-    expect(toCatalogProduct({ ...row, localStock: null }).availabilityInput.localQuantity).toBe(0);
+    expect(
+      toCatalogProduct({ ...row, localStock: null }, now).availabilityInput.localQuantity,
+    ).toBe(0);
+  });
+
+  it("oferta de SM vieja (sync caído) → sin stock y sin 'últimas unidades'", () => {
+    const later = new Date(now.getTime() + 7 * 3_600_000);
+    const p = toCatalogProduct(row, later);
+    expect(p.availabilityInput.offers).toEqual([{ supplier: "SM", mode: "DROPSHIP", stock: 0 }]);
+    expect(p.lowStock).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { ProductLike } from "../domain/availability";
 import { availableQuantity } from "../domain/inventory";
+import { effectiveSupplierStock } from "../domain/supplier";
 import { isCategory, silhouetteFor } from "./categories";
 
 /**
@@ -33,8 +34,12 @@ export type CatalogProduct = {
   lowStock: boolean;
 };
 
-/** Pura: fila de la base → producto de catálogo. */
-export function toCatalogProduct(row: ProductRow): CatalogProduct {
+/**
+ * Pura: fila de la base → producto de catálogo.
+ * Una oferta de SM sin sincronizar hace más de `config.sm.staleHours` cuenta como sin stock.
+ */
+export function toCatalogProduct(row: ProductRow, now: Date = new Date()): CatalogProduct {
+  const offers = row.offers.map((o) => ({ ...o, stock: effectiveSupplierStock(o, now) }));
   return {
     id: row.id,
     slug: row.slug,
@@ -48,9 +53,11 @@ export function toCatalogProduct(row: ProductRow): CatalogProduct {
     availabilityInput: {
       isConsumable: row.isConsumable,
       localQuantity: row.localStock ? availableQuantity(row.localStock) : 0,
-      offers: row.offers.map((o) => ({ supplier: o.supplier, mode: o.mode, stock: o.stock })),
+      offers: offers.map((o) => ({ supplier: o.supplier, mode: o.mode, stock: o.stock })),
     },
-    lowStock: row.offers.some((o) => o.mode === "DROPSHIP" && o.stockState === "bajo_stock"),
+    lowStock: offers.some(
+      (o) => o.mode === "DROPSHIP" && o.stock > 0 && o.stockState === "bajo_stock",
+    ),
   };
 }
 
@@ -64,7 +71,7 @@ export async function listPublished(
     include: catalogInclude,
     orderBy: [{ createdAt: "desc" }, { id: "asc" }],
   });
-  return rows.map(toCatalogProduct);
+  return rows.map((r) => toCatalogProduct(r));
 }
 
 export async function getPublishedBySlug(
@@ -88,5 +95,5 @@ export async function listPublishedByIds(
     where: { id: { in: ids }, published: true },
     include: catalogInclude,
   });
-  return rows.map(toCatalogProduct);
+  return rows.map((r) => toCatalogProduct(r));
 }

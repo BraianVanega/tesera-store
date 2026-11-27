@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "data": {
+    "quoteId": "q_9f2c8a71b04e4d6f8c1e5a3b7d904f21",
+    "venceEn": "2026-07-29T18:40:00",
+    "paquete": { "calculadoDeItems": true, "bultos": 1, "pesoGr": 880, "pesoTotalGr": 880, "largoCm": 40, "anchoCm": 40, "altoCm": 40 },
+    "total": 3,
+    "options": [
+      { "carrier": "MOOVA", "carrierNombre": "YIP / Flex", "servicio": "FLEX", "tipoEntrega": "D", "code": "moova-flex", "nombre": "YIP / Flex - Envio en el dia", "precio": 7085.47, "plazoMinDias": 0, "plazoMaxDias": 1 },
+      { "carrier": "CORREO", "carrierNombre": "Correo Argentino", "servicio": "CP", "tipoEntrega": "S", "code": "ca-cp-suc", "nombre": "Correo Clasico (a sucursal)", "precio": 8269.84, "plazoMinDias": 2, "plazoMaxDias": 5 },
+      { "carrier": "CORREO", "carrierNombre": "Correo Argentino", "servicio": "CP", "tipoEntrega": "D", "code": "ca-cp-dom", "nombre": "Correo Clasico (a domicilio)", "precio": 13303.45, "plazoMinDias": 2, "plazoMaxDias": 5 }
+    ]
+  }
+}

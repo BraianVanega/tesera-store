@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { getCartProducts, readCart } from "@/lib/shop/data";
+import { zoneForCp } from "@/lib/sm/server";
 import {
   COOKIES,
   COOKIE_MAX_AGE,
@@ -12,7 +13,6 @@ import {
   serializeCart,
   serializeZone,
   setQty,
-  zoneFromCp,
 } from "@/lib/shop/session";
 
 /**
@@ -38,7 +38,9 @@ export async function setZoneAction(_prev: ZoneState, form: FormData): Promise<Z
   const raw = z.string().max(12).safeParse(form.get("cp"));
   const cp = raw.success ? normalizeCp(raw.data) : null;
   if (!cp) return { error: "Revisá el código postal: son 4 números, por ejemplo 7600." };
-  (await cookies()).set(COOKIES.zone, serializeZone(zoneFromCp(cp)), cookieOptions);
+  // AMBA (CABA y GBA) se confirma con la cotización de SM (`moova-flex`).
+  const zone = await zoneForCp(cp);
+  (await cookies()).set(COOKIES.zone, serializeZone({ zone, cp }), cookieOptions);
   return { ok: true };
 }
 

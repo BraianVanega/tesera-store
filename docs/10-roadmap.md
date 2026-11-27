@@ -29,11 +29,28 @@ Fuera de alcance de v1: facturación electrónica ARCA, verificación formal de 
 - _Notas 25/11:_ migración inicial generada offline; migración, seed (2 veces) e importador (2 veces) probados contra un Postgres en memoria (PGlite): idempotentes. El importador lee el JSON de `/products` de SM (no hay CSV todavía) y crea **borradores** (sin publicar, sin categoría). Consultas de catálogo en `src/lib/catalog/queries.ts`; las pantallas son Fase 4. ⏳ **Faltan los ≥ 50 productos reales**: necesitan base, datos de SM (JSON o CSV) y la regla de precio de Brai.
 
 ## Fase 3 · Integración SM
-- [ ] Confirmar con SM los ⏳ de `04` (cuenta con "despacho sin etiqueta", tope diario). **Sin esto, no seguir.**
-- [ ] `lib/sm/*`: client con rate limit, schemas Zod, sync (full diario / incremental / stock), quote (con cache), dispatch, poll de estado.
-- [ ] Crons en Vercel y `pnpm sm:sync`. `IntegrationLog`.
-- [ ] Tests con fixtures de `tests/fixtures/sm/`.
+- [x] ~~Confirmar con SM los ⏳ de `04`~~: "despacho sin etiqueta" confirmado el 25/11; el tope diario nadie lo sabe y se resuelve autorregulándose con los headers (ver `04`). Ya no bloquea.
+- [x] `lib/sm/*`: client con rate limit, schemas Zod, sync (full diario / incremental / stock), quote (con cache), dispatch, poll de estado.
+- [x] Crons (`/api/cron/sm-*`) y `pnpm sm:sync`. `IntegrationLog`.
+- [x] Tests con fixtures de `tests/fixtures/sm/`.
 - **Aceptación:** sync llena `SupplierOffer`; cotización por CP devuelve opciones y detecta AMBA; pedido de prueba creado en SM dos veces → una sola orden. 🛑
+- _Notas 26/11:_
+  - Módulos en `src/lib/sm/`:
+    - `client.ts`: Bearer, timeout de 10 s, Zod en todo. Lee `X-RateLimit-*`, respeta `Retry-After` (si pide esperar más de 60 s, corta y sigue el próximo cron) y reintenta con backoff, incluido `POST /orders`, que es idempotente. Con menos del 20 % del cupo diario frena el sync; cotizar y crear pedidos siguen. Logs sin PII.
+    - `sync.ts`: completo, incremental y stock. Nunca borra. El incremental guarda su cursor en la tabla nueva `SyncState` (migración `sync_state`) y solo lo avanza si la corrida terminó entera. El upsert por producto se movió a `catalog/upsert.ts` y lo comparte con `pnpm catalog:import`.
+    - `quote.ts`: diferencia la cotización de carrito (solo CP: su `quoteId` se descarta) de la de checkout (la que se guarda). Precio en pesos enteros, plazo + 1 día de preparación, cache de 10 min.
+    - `dispatch.ts`: `externalOrderId = order.code`, sin email ni bloque `comprador`. Los warnings de SM → `needsAttention`. Si faltan datos, no inventa nada: marca el pedido para Eric. Si SM falla, el pedido sigue `PAID` para reintentar.
+    - `status.ts`: guarda `fulfillmentStatus` crudo y loguea cada valor nuevo. Pasa a `SHIPPED` con tracking o con "despachado".
+  - **Oferta vieja = sin stock**: si una oferta no se sincronizó en `config.sm.staleHours` (6 h, ⏳ Brai), la tienda la muestra sin stock (`domain/supplier.ts`).
+  - **La zona ahora sale de la cotización**: el chip de CP cotiza con SM y `moova-flex` = AMBA. Cierra "GBA cae en Interior" de la Fase 4. Sin key o con SM caído, vuelve a la detección por CP.
+  - **Crons**: Vercel Hobby solo permite crons diarios. `vercel.json` corre el sync completo a las 03:00 (hora de Argentina); `.github/workflows/sm-cron.yml` dispara stock cada hora e incremental + seguimiento cada 2 h. Necesita los secrets `CRON_BASE_URL` y `CRON_SECRET`; sin ellos no hace nada. En Vercel Pro se puede pasar todo a `vercel.json`.
+  - Tests:
+    - 50 unitarios de SM.
+    - 12 de integración contra Postgres real (`tests/integration/sm.test.ts`, con `TEST_DATABASE_URL`; CI levanta un Postgres). Cubren sync idempotente que no pisa lo curado, fallo a mitad sin borrar, oferta vieja, despacho doble con una sola orden, falta de datos y seguimiento.
+    - Prueba manual con un SM falso local: crons por HTTP (401 sin secreto) y zona por cotización (1824 → AMBA).
+  - El e2e refresca `syncedAt` antes de correr (`tests/e2e/global-setup.ts`). Si no, el catálogo del seed "se vence" a las 6 h.
+  - ⏳ **Falta la prueba contra la API real** (necesita `SM_API_KEY`): `pnpm sm:sync products --full`, `pnpm sm:sync`, `pnpm sm:sync quote --cp 1824` / `1425` / `5000`. **No se crean pedidos reales**: el criterio "pedido de prueba dos veces → una orden" está probado con la respuesta documentada (`yaExistia`), no contra SM.
+  - ⏳ La forma de `/stock` no figura en la doc: se asume `sku`/`stock`/`estado`. Confirmar con la primera respuesta real.
 
 ## Fase 4 · Tienda (frontend)
 - [x] Tokens, layout, header con chip de zona, modo discreto (cookie), footer.
@@ -54,6 +71,7 @@ Fuera de alcance de v1: facturación electrónica ARCA, verificación formal de 
   - Fuera de esta fase: el botón "Continuar con tus datos" queda deshabilitado hasta la Fase 5; los links de ayuda/legales del footer y el newsletter del diseño, Fase 8; "más elegidos" por ventas reales, Fase 6 (hoy son los últimos publicados).
 
 ## Fase 5 · Checkout y pagos
+- _Definido por Brai (26/11):_ cadete en MdP gratis desde $ 15.000 (falta el precio por debajo); comprobante de transferencia **subido a Blob y por WhatsApp** (falta el número); MP se integra con ayuda del MCP oficial (`.mcp.json`).
 - [ ] Checkout 3 pasos; segunda cotización con calle y número; guardado de `quoteId`.
 - [ ] `PaymentProvider` + Mercado Pago Checkout Pro, preferencia, webhook verificado e idempotente, efectivo vía MP.
 - [ ] Transferencia: reserva, timer 24 h, comprobante a Blob, `expire-transfers`.

@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "data": {
+    "total": 3,
+    "items": [
+      { "id": 4, "descripcion": "Buenos Aires" },
+      { "id": 3, "descripcion": "Capital Federal" },
+      { "id": 8, "descripcion": "Cordoba" }
+    ]
+  }
+}

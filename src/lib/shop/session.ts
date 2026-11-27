@@ -31,8 +31,8 @@ export function normalizeCp(input: string): string | null {
 }
 
 /**
- * Zona a partir del CP, sin cotización. GBA no se puede distinguir del Interior solo por CP:
- * hasta la Fase 3 (cotización de SM con `moova-flex`) cae en Interior. TODO(brai): ver docs/11.
+ * Zona a partir del CP, SIN cotización (respaldo cuando SM no responde). GBA no se distingue del
+ * Interior solo por CP: la tienda usa `zoneForCp()` (src/lib/sm/server.ts), que cotiza con SM.
  */
 export function zoneFromCp(cp: string): ShopZone {
   return { zone: detectZone(cp), cp };
