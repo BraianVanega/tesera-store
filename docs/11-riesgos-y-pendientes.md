@@ -35,10 +35,11 @@
 - [x] ~~**Precio del cadete en MdP**~~: $ 2.500 por tanda (26/11), `config.mdpCourierFee`.
 - [ ] **Número de WhatsApp** para el comprobante de transferencia (Fase 5, `WHATSAPP_NUMBER`). Sin él no se muestra el botón.
 - [ ] **Datos de la cuenta para transferir** (`TRANSFER_HOLDER`, `TRANSFER_CBU`, `TRANSFER_ALIAS`, solo en Vercel). Sin ellos la página del pedido dice "te pasamos los datos por WhatsApp".
-- [ ] **Credenciales de prueba de MP** y **`MP_WEBHOOK_SECRET`** (Fase 5). El MCP ayuda a integrar, pero la tienda llama a la API de MP con `MP_ACCESS_TOKEN`. Configurar la URL del webhook (`/api/webhooks/mercadopago`, evento "Pagos") en "Tus integraciones".
-- [ ] **Verificar la plantilla de la firma del webhook** con el simulador de MP (`src/lib/payments/webhook.ts`): se usó la de los SDK porque la doc pública no la muestra completa.
+- [ ] **Credenciales de prueba de MP** y **`MP_WEBHOOK_SECRET`** (Fase 5). El MCP ayuda a integrar, pero la tienda llama a la API de MP con `MP_ACCESS_TOKEN`. Configurar la URL del webhook (`/api/webhooks/mercadopago`, evento **"Order (Mercado Pago)"**) en "Configuración de Webhooks" de la app.
+- [ ] **Probar la firma del webhook con el simulador de MP** (evento Order) contra un preview de Vercel. La plantilla ya está confirmada con la doc oficial de Checkout Pro (Orders).
+- [ ] **Pago con tarjeta después de vencida la reserva de MP**: con la API de Orders, MP no corta el link a las 2 h (la order dura `P4D` para cubrir el ticket de efectivo). Hoy ese pago cae en `late` y Eric lo resuelve. Si pasa seguido: cancelar la order de MP al vencer la reserva (guardar el id de la order).
 - [ ] **`config.mpHoldHours`** (cuánto se reserva el stock mientras el cliente paga con MP): hoy **2 h**. ¿Va?
-- [ ] Nombre de fantasía definitivo para `statement_descriptor` (hoy `"TESERA"`) y confirmar longitud permitida por MP.
+- [ ] Nombre de fantasía definitivo para `statement_descriptor` (hoy `"TESERA"`; MP acepta hasta 13 caracteres).
 - [ ] Página del pedido sin token: con PPR el 404 es "blando" (HTTP 200 + noindex + "no encontramos ese pedido"). No expone datos; si se quiere un 404 real, hay que sacar la página del prerender parcial.
 - [ ] Textos legales con un profesional (términos, privacidad, cambios, arrepentimiento).
 - [ ] Retención de datos (`PII_RETENTION_MONTHS`).
