@@ -1,0 +1,15 @@
+{
+  "_nota": "La doc de SM no muestra la forma de /stock: se asume sku/stock/estado (como en /products). Reemplazar con una respuesta real anonimizada.",
+  "ok": true,
+  "data": {
+    "total": 3,
+    "page": 1,
+    "pageSize": 200,
+    "totalPaginas": 1,
+    "items": [
+      { "sku": "ABC123", "stock": 12, "estado": "disponible" },
+      { "sku": "DEF456", "stock": 2, "estado": "bajo_stock" },
+      { "sku": "GHI789", "stock": 0, "estado": "agotado" }
+    ]
+  }
+}

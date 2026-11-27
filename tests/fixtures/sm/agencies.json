@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "data": {
+    "total": 2,
+    "items": [
+      { "codigo": "1824A", "nombre": "Sucursal Lanus", "direccion": "Av. Hipolito Yrigoyen 3850", "localidad": "Lanus Oeste", "cp": "1824" },
+      { "codigo": "1826B", "nombre": "Sucursal Remedios de Escalada", "direccion": "Rivadavia 120", "localidad": "Remedios de Escalada", "cp": "1826" }
+    ]
+  }
+}

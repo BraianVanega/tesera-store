@@ -1,0 +1,4 @@
+{
+  "ok": true,
+  "data": { "pedidoId": 123456, "externalOrderId": "SHOP-0001234", "estado": "INGESTADO", "totalMayorista": 25000.0, "warnings": [], "yaExistia": true }
+}
