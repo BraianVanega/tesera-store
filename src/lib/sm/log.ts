@@ -2,7 +2,7 @@ import type { PrismaClient } from "@prisma/client";
 import type { SmLogEntry } from "./client";
 
 /** Logger a IntegrationLog. Sin PII: solo acción, status, código de pedido y un mensaje corto. */
-export function integrationLogger(db: PrismaClient, service: "SM" | "CRON" = "SM") {
+export function integrationLogger(db: PrismaClient, service: "SM" | "MP" | "CRON" = "SM") {
   return async (e: SmLogEntry) => {
     await db.integrationLog.create({
       data: {

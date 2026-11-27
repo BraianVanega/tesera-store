@@ -36,6 +36,11 @@ export const envSchema = z.object({
   // Mercado Pago (Fase 5, docs/05)
   MP_ACCESS_TOKEN: optional(z.string().min(1)),
   MP_WEBHOOK_SECRET: optional(z.string().min(1)),
+  /** Solo para pruebas (MP falso local). En producción no se define. */
+  MP_API_BASE_URL: optional(z.string().url()),
+
+  // WhatsApp para recibir comprobantes (Fase 5). Solo dígitos, con código de país: 549223…
+  WHATSAPP_NUMBER: optional(z.string().regex(/^\d{10,15}$/, "Solo dígitos con código de país")),
 
   // Transferencia (Fase 5, docs/05). TODO(brai): datos reales de la cuenta, solo en Vercel.
   TRANSFER_ALIAS: optional(z.string().min(1)),

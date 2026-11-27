@@ -247,6 +247,7 @@ model Order {
   postalCode      String
   provinceId      Int?
   province        String?
+  deliveryNotes   String?                          // "Indicaciones para el cadete" (timbre, horario)
   deliverTogether Boolean       @default(false)    // carrito mixto MdP: "prefiero todo junto"
   anonymizedAt    DateTime?
 

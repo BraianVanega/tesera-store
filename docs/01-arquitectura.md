@@ -43,7 +43,7 @@ src/
   lib/
     domain/              # PURO: zone, pricing, availability (+ tests)
     sm/                  # client, schemas (zod), sync, quote, dispatch
-    mp/                  # preference, webhook, verify
+    mp/                  # order (API de Orders), webhook, verify
     orders/              # crear orden, transiciones de estado, stock
     discrete/            # cookie + helpers de modo discreto
     config.ts            # umbrales, % de descuento, plazos

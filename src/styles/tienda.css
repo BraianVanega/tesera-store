@@ -575,3 +575,133 @@
   background: rgba(243, 235, 224, 0.24);
   color: var(--text);
 }
+
+/* ── Checkout, confirmación y seguimiento (design/reference/tienda.css) ── */
+.m-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.m-step {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 3px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.m-step.on {
+  border-top-color: var(--text);
+  color: var(--text);
+}
+.m-opt {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font: 400 15px var(--font-body);
+  border-radius: 18px;
+  border: 1.5px solid transparent;
+  background: var(--surface);
+  transition: border-color 200ms var(--ease);
+}
+.m-opt.on {
+  border-color: var(--text);
+  outline: 0;
+}
+.m-opt:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.m-radio {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  border: 1.5px solid var(--text-2);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.m-opt.on .m-radio {
+  border-color: var(--text);
+}
+.m-opt.on .m-radio::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--text);
+}
+.m-tl {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.m-tl li {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding-bottom: 24px;
+}
+.m-tl li:last-child {
+  padding-bottom: 0;
+}
+.m-tl li::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 26px;
+  bottom: 2px;
+  width: 2px;
+  background: var(--border);
+}
+.m-tl li:last-child::before {
+  display: none;
+}
+.m-dot {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bg);
+}
+.m-tl li.done .m-dot {
+  background: var(--text);
+  border-color: var(--text);
+}
+.m-tl li.now .m-dot {
+  border-color: var(--text);
+  box-shadow:
+    inset 0 0 0 4px var(--bg),
+    inset 0 0 0 12px var(--text);
+}
+.c-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+.b-ok {
+  background: var(--text);
+  color: var(--bg);
+}
