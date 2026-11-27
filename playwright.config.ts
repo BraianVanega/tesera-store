@@ -13,6 +13,7 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 7"] } },
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
   ],
+  globalSetup: "./tests/e2e/global-setup.ts",
   webServer: {
     command: process.env.CI ? `pnpm start --port ${PORT}` : `pnpm dev --port ${PORT}`,
     port: PORT,
