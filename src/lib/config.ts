@@ -37,6 +37,26 @@ export const config = {
   /** Costos fijos mensuales que se descuentan en la liquidación (pesos). */
   fixedMonthlyCosts: [{ name: "Abono SexShopMayorista", amount: 50_000 }],
 
+  /** Integración con SexShopMayorista (docs/04). */
+  sm: {
+    baseUrl: "https://www.sexshopmayorista.com",
+    /** Oferta sin sincronizar hace más de esto = sin stock. TODO(brai): confirmar (propuesta 6 h). */
+    staleHours: 6,
+    /** Por debajo de este % del tope diario se frena el sync; cotizaciones y pedidos siguen. */
+    syncBudgetFloorPct: 20,
+    pageSize: 200, // máximo que acepta SM
+    timeoutMs: 10_000,
+    maxRetries: 3,
+    /** Si SM pide esperar más que esto (429 diario), no se espera: se corta y se reintenta en el próximo cron. */
+    maxRetryAfterMs: 60_000,
+    /** Cache de cotizaciones por (destino, ítems). La cotización vale 24 h; la cacheamos menos. */
+    quoteCacheMinutes: 10,
+    /** Días hábiles de preparación que se suman al plazo del transportista (docs/04). */
+    prepDays: 1,
+    /** Bulto de referencia para detectar la zona con solo el CP (sin ítems: no da quoteId). */
+    probePackage: { pesoGr: 500, altoCm: 10, anchoCm: 15, largoCm: 20 },
+  },
+
   /** Texto de plazos por fuente/zona (los usa availability()). */
   delivery: {
     LOCAL: "Hoy en Mar del Plata",

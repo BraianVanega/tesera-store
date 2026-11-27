@@ -4,7 +4,7 @@
  *   pnpm catalog:import --file ruta/products.json [--images] [--dry-run]
  *
  * Entrada: el JSON de `GET /api/v1/products` de SM (una página `{ok,data:{items}}`, un array de
- * páginas o un array de productos). Cuando exista el cliente de la Fase 3, el sync lo llama directo.
+ * páginas o un array de productos). Para traerlo de la API directo: `pnpm sm:sync products`.
  *
  * - Producto nuevo → Product borrador (sin publicar, sin categoría) + ofertas DROPSHIP y STOCK.
  * - Producto ya importado (por SKU) → solo actualiza ofertas y fotos; no pisa lo curado.
@@ -14,8 +14,7 @@
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { z } from "zod";
-import { syncImages } from "../src/lib/catalog/images";
-import { mapSmProduct, slugify, type OfferData } from "../src/lib/catalog/import";
+import { upsertSmProduct } from "../src/lib/catalog/upsert";
 import { smProductSchema, type SmProduct } from "../src/lib/sm/schemas";
 import { downloadImage, uploadPublicImage } from "../src/lib/storage/blob";
 import { scriptDb } from "./lib/db";
@@ -46,18 +45,6 @@ function readProducts(path: string): { products: SmProduct[]; invalid: string[] 
   return { products, invalid };
 }
 
-const offerFields = (o: OfferData) => ({
-  cost: o.cost,
-  stock: o.stock,
-  stockState: o.stockState,
-  suggested: o.suggested,
-  campaign: o.campaign ?? undefined,
-  weightGr: o.weightGr,
-  dimensions: o.dimensions ?? undefined,
-  vatPct: o.vatPct,
-  syncedAt: o.syncedAt,
-});
-
 async function main() {
   if (!args.file) {
     console.error("Uso: pnpm catalog:import --file products.json [--images] [--dry-run]");
@@ -82,78 +69,19 @@ async function main() {
   const stats = { created: 0, updated: 0, images: 0, imageErrors: 0 };
 
   try {
+    const images = blobToken
+      ? {
+          download: downloadImage,
+          upload: (path: string, body: ArrayBuffer, type: string) =>
+            uploadPublicImage(path, body, type, blobToken),
+        }
+      : undefined;
     for (const p of products) {
-      const existing = await db.supplierOffer.findUnique({
-        where: {
-          supplier_supplierSku_mode: {
-            supplier: "SM",
-            supplierSku: p.sku.trim(),
-            mode: "DROPSHIP",
-          },
-        },
-        select: { productId: true },
-      });
-
-      const takenSlugs = new Set(
-        (
-          await db.product.findMany({
-            where: { slug: { startsWith: slugify(p.nombre) || slugify(p.sku) } },
-            select: { slug: true },
-          })
-        ).map((r) => r.slug),
-      );
-      const mapped = mapSmProduct(p, { now, slugTaken: (s) => takenSlugs.has(s) });
-
-      const productId = await db.$transaction(async (tx) => {
-        const id =
-          existing?.productId ??
-          (await tx.product.create({ data: mapped.draft, select: { id: true } })).id;
-        for (const o of mapped.offers) {
-          await tx.supplierOffer.upsert({
-            where: {
-              supplier_supplierSku_mode: {
-                supplier: o.supplier,
-                supplierSku: o.supplierSku,
-                mode: o.mode,
-              },
-            },
-            create: {
-              productId: id,
-              supplier: o.supplier,
-              supplierSku: o.supplierSku,
-              mode: o.mode,
-              ...offerFields(o),
-            },
-            update: offerFields(o),
-          });
-        }
-        return id;
-      });
-      if (existing) stats.updated++;
-      else stats.created++;
-
-      if (blobToken && mapped.images.length) {
-        const have = await db.productImage.findMany({
-          where: { productId, sourceUrl: { not: null } },
-          select: { sourceUrl: true },
-        });
-        const r = await syncImages(
-          mapped.images,
-          have.map((h) => h.sourceUrl!),
-          {
-            download: downloadImage,
-            upload: (path, body, type) => uploadPublicImage(path, body, type, blobToken),
-          },
-        );
-        if (r.stored.length) {
-          await db.productImage.createMany({
-            data: r.stored.map((s) => ({ productId, ...s })),
-            skipDuplicates: true,
-          });
-        }
-        stats.images += r.stored.length;
-        stats.imageErrors += r.failed.length;
-      }
+      const r = await upsertSmProduct(db, p, { now, images });
+      if (r.created) stats.created++;
+      else stats.updated++;
+      stats.images += r.images;
+      stats.imageErrors += r.imageErrors;
     }
 
     await db.integrationLog.create({
